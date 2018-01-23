@@ -1,0 +1,60 @@
+---
+
+- name: Extract download file type
+  set_fact:
+    download_file_type: "{{ nextcloud_download_url[-3:] }}"
+
+- name: Install unzip
+  package:
+    name: unzip
+    state: present
+  when: download_file_type == 'zip'
+
+- name: Remove trailing slash from installation directory
+  set_fact:
+    nextcloud_installation_dir: >-
+      {{ nextcloud_installation_dir | regex_replace('/$', '') }}
+
+- name: Read installation parent dir
+  set_fact:
+    nextcloud_installation_parent_dir: "{{ nextcloud_installation_dir | dirname }}"
+
+- name: Download nextcloud
+  unarchive:
+    src: "{{ nextcloud_download_url }}"
+    dest: "{{ nextcloud_installation_parent_dir }}"
+    remote_src: yes
+    owner: "{{ nextcloud_file_owner }}"
+    group: "{{ nextcloud_file_owner }}"
+  changed_when: false
+
+- name: Move nextcloud folder
+  command: mv "{{ nextcloud_installation_parent_dir }}" "{{ nextcloud_installation_dir }}"
+  when: nextcloud_installation_dir | basename != "nextcloud"
+
+  # TODO see why this returns as changed:
+- name: Set permissions on nextcloud files
+  file:
+    path: "{{ nextcloud_installation_dir }}"
+    recurse: yes
+    state: directory
+    mode: u=rwX,g=rX,o=rX
+
+- name: Install nextcloud
+  command: >-
+    php occ maintenance:install --no-interaction
+      --database "{{ nextcloud_db_backend }}"
+      --database-name "{{ nextcloud_db_name }}"
+      --database-user "{{ nextcloud_db_user }}"
+      --database-pass "{{ nextcloud_db_pass }}"
+      --database-host "{{ nextcloud_db_host }}"
+      --database-port "{{ nextcloud_db_port }}"
+      --admin-user "{{ nextcloud_admin_user }}"
+      --admin-pass "{{ nextcloud_admin_pass }}"
+      --data-dir "{{ nextcloud_data_dir }}"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+    creates: "{{ nextcloud_installation_dir }}/config/config.php"
+  become_method: sudo
+  become_user: "{{ nextcloud_file_owner }}"
+  become: yes

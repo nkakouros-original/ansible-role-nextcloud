@@ -1,0 +1,18 @@
+---
+
+- name: Check nextcloud status
+  command: php occ status
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  become_user: "{{ nextcloud_file_owner }}"
+  register: nextcloud_status
+
+- name: Check if upgrade is needed
+  block:
+    - set_fact:
+        upgrade_string: >-
+          Nextcloud or one of the apps require upgrade - only a limited number
+          of commands are available
+    - set_fact:
+        nextcloud_upgrade: yes
+      when: upgrade_string in nextcloud_status.stdout_lines

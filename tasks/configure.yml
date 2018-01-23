@@ -1,0 +1,33 @@
+---
+
+# TODO change permissions on config.php and htaccess
+- name: Set the domain in config.php
+  block:
+    - lineinfile:
+        path: "{{ nextcloud_installation_dir }}/config/config.php"
+        regexp: "'overwrite\\.cli\\.url' => '[^\\s]*',"
+        line: "  'overwrite.cli.url' => '{{ nextcloud_urls[0] | regex_replace(':[0-9]{2,5}', '') }}',"
+        insertbefore: '\);'
+        validate: "/usr/bin/php -l %s"
+      notify: "nextcloud update htaccess"
+    - blockinfile:
+        path: "{{ nextcloud_installation_dir }}/config/config.php"
+        block: |2
+            'trusted_domains' => array(
+              '{{ nextcloud_urls | map("urlsplit", 'hostname') | join("',!    '") | regex_replace('!', '\n') }}'
+            ),
+        marker: "  # {mark} ANSIBLE MANAGED BLOCK"
+        insertbefore: '\);'
+        validate: "/usr/bin/php -l %s"
+      notify: "nextcloud update htaccess"
+
+- name: Enable Pretty Urls
+  lineinfile:
+    path: "{{ nextcloud_installation_dir }}/config/config.php"
+    regexp: "'htaccess\\.RewriteBase' => '/{{ nextcloud_urls[0] | regex_replace('/$', '') | urlsplit('path') | regex_replace('^/', '') }}',$"
+    line: "  'htaccess.RewriteBase' => '/{{ nextcloud_urls[0] | regex_replace('/$', '') | urlsplit('path') | regex_replace('^/') }}',"
+    insertbefore: '\);'
+    validate: "/usr/bin/php -l %s"
+  notify: "nextcloud update htaccess"
+  when: nextcloud_enable_pretty_urls
+  # validate

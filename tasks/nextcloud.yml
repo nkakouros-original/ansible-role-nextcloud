@@ -1,0 +1,9 @@
+---
+
+#- include_tasks: assertions.yml
+
+#- include_tasks: install.yml
+
+- include_tasks: configure.yml
+
+- include_tasks: upgrade.yml

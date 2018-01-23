@@ -1,0 +1,61 @@
+---
+
+nextcloud_enable: yes
+# Set this to 'no' to completely disable the role
+
+nextcloud_version: ''
+# The major nextcloud version to install. You can use this to upgrade to a new
+# major version as well.
+
+nextcloud_download_url: >-
+  {% if nextcloud_version != '' %}
+    https://download.nextcloud.com/server/releases/latest-{{ nextcloud_version }}.zip
+  {% else %}
+  https://download.nextcloud.com/server/releases/latest.zip
+  {% endif %}
+
+# The url to download nextcloud from. Currently only the latest stable version
+# is supported.
+
+nextcloud_installation_dir: '/var/www/html/nextcloud/'
+# Where to extract nextcloud files
+
+nextcloud_file_owner: 'www-data'
+# The user that will own nextcloud files.
+
+nextcloud_db_backend: 'mysql'
+# The database server that will be used. It should be already installed and
+# the database should already exist. For 'mariadb', set this to 'mysql'.
+
+nextcloud_db_name: 'nextcloud'
+# The name of the database nextcloud will use. It should already exist on the
+# system.
+
+nextcloud_db_user: 'nextcloud'
+# The database user that nextcloud will use to access the database. The user
+# should already exist in the database backend (together with their password).
+
+nextcloud_db_pass: ''
+# The database user's password. This variable should not be empty.
+
+nextcloud_db_host: localhost
+# The database host
+
+nextcloud_db_port: 3306
+# The port the db server listens on
+
+nextcloud_data_dir: "{{ nextcloud_installation_dir }}/data"
+# Path to nextcloud user data directory
+
+nextcloud_admin_user: admin
+# The name of the admin user
+
+nextcloud_admin_pass: ''
+# The password of the admin user. This variable should not be empty.
+
+nextcloud_enable_pretty_urls: yes
+# Set to yes to enable urls of the form https://example.org/calendar replacing
+# https://example.org/nextcloud/index.php/s/Sv1b7krAUqmF8QQ.
+
+nextcloud_urls:
+  - https://localhost:80/folder
