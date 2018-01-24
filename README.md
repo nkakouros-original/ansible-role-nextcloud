@@ -1,38 +1,160 @@
-Role Name
+Ansible Role: Nextcloud
 =========
 
-A brief description of the role goes here.
+Installs Nextcloud. It only does that, it does not install a web server, a db server, etc.
+
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+While there are a bunch of other roles around, I did not found them useful as they try to do everything in one role, ie setup Apache, then MySQL, then install Nextcloud, etc. This might be useful for users who want to have a Nextcloud instance running as fast as possible. However, I find the approach too limiting as there are many assumptions taking place. 
+
+This role does not care where you install Nextcloud. It only downloads, installs and configures Nextcloud itself. Its aim is to be used in a modular way alongside other roles. (Or at least it tries to make no assumptions. If you find any or cannot install nextcloud due to missing functionality, please open an issue or a PR. Currently it has been tested only on Ubuntu 16.04).
+
+See the [#example_playbooks] on how a complete playbook that uses 3rd-party roles might look like.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+```yaml
+nextcloud_enable: yes
+# Set this to 'no' to completely disable the role
 
-Dependencies
-------------
+nextcloud_version: ''
+# The major nextcloud version to install. You can use this to upgrade to a new
+# major version as well.
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+nextcloud_download_url: >-
+  {% if nextcloud_version != '' %}
+    https://download.nextcloud.com/server/releases/latest-{{ nextcloud_version }}.zip
+  {% else %}
+  https://download.nextcloud.com/server/releases/latest.zip
+  {% endif %}
+
+# The url to download nextcloud from. Currently only the latest stable version
+# is supported.
+
+nextcloud_installation_dir: '/var/www/html/nextcloud/'
+# Where to extract nextcloud files
+
+nextcloud_file_owner: 'www-data'
+# The user that will own nextcloud files.
+
+nextcloud_db_backend: 'mysql'
+# The database server that will be used. It should be already installed and
+# the database should already exist. For 'mariadb', set this to 'mysql'.
+
+nextcloud_db_name: 'nextcloud'
+# The name of the database nextcloud will use. It should already exist on the
+# system.
+
+nextcloud_db_user: 'nextcloud'
+# The database user that nextcloud will use to access the database. The user
+# should already exist in the database backend (together with their password).
+
+nextcloud_db_pass: ''
+# The database user's password. This variable should not be empty.
+
+nextcloud_db_host: localhost
+# The database host
+
+nextcloud_db_port: 3306
+# The port the db server listens on
+
+nextcloud_data_dir: "{{ nextcloud_installation_dir }}/data"
+# Path to nextcloud user data directory
+
+nextcloud_admin_user: admin
+# The name of the admin user
+
+nextcloud_admin_pass: ''
+# The password of the admin user. This variable should not be empty.
+
+nextcloud_enable_pretty_urls: yes
+# Set to yes to enable urls of the form https://example.org/calendar replacing
+# https://example.org/nextcloud/index.php/s/Sv1b7krAUqmF8QQ.
+
+nextcloud_urls:
+  - https://localhost:80/folder
+```
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+Here is a complete example of how to use this role in conjuction with other roles in order to get a complete server environment running Nextcloud. In this example, I use the well known [geerlingguy](https://github.com/geerlingguy/) roles to install apache, mysql and php, alongside Nextcloud, on Ubuntu 16.04.
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+- hosts: server
+  any_errors_fatal: true
+  become: yes
+  roles:
+    - ansible-role-php
+    - ansible-role-mysql
+    - ansible-role-apache
+    - ansible-role-nextcloud
+  vars:
+    mysql_root_password_update: no
+    mysql_databases:
+    - name: "nextcloud"
+    mysql_users:
+    - name: "nextcloud"
+      password: "secret_password"
+      priv: "nextcloud.*:ALL"
+    mysql_packages:
+    - mariadb-client
+    - mariadb-server
+    - python-mysqldb
+    php_packages_extra:
+    - libapache2-mod-php7.0
+    - php-zip
+    - php-imap
+    - php-gd
+    - php-json
+    - php-xml
+    - php-mbstring
+    - php-mysql
+    - php-curl
+    - php-bz2
+    - php-intl
+    - php-mcrypt
+    - php-gmp
+    - php-apcu
+    - php-imagick
+    apache_remove_default_vhost: true
+    apache_vhosts:
+    - servername: "nextcloud.example.com"
+      documentroot: "/var/www/html/nextcloud"
+      extra_parameters: |
+        SetEnv HOME /var/www/html/nextcloud
+        SetEnv HTTP_HOME /var/www/html/nextcloud
+    apache_mods_enabled:
+    - rewrite.load
+    - php7.0.load
+    - headers.load
+    - env.load
+    - dir.load
+    - mime.load
+    nextcloud_download_url: https://download.nextcloud.com/server/prereleases/nextcloud-13.0.0RC2.zip
+    nextcloud_db_name: "{{ mysql_databases[0].name }}"
+    nextcloud_db_user: "{{ mysql_users[0].name }}"
+    nextcloud_db_pass: "{{ mysql_users[0].password }}"
+    nextcloud_admin_user: "admin"
+    nextcloud_admin_pass: "admin_pass"
+    nextcloud_urls_tmp: >-
+      {{ apache_vhosts
+        | map(attribute='servername')
+        | list
+        | zip_longest([], fillvalue=':80')
+        | map('join')
+        | list }}
+    nextcloud_urls: >-
+      {{ []
+        | zip_longest(nextcloud_urls_tmp, fillvalue='http://')
+        | map('join')
+        | list}}
+```
 
 License
 -------
 
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+GPLv3
