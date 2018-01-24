@@ -6,6 +6,7 @@
     chdir: "{{ nextcloud_installation_dir }}"
   become_user: "{{ nextcloud_file_owner }}"
   register: nextcloud_status
+  changed_when: false
 
 - name: Check if upgrade is needed
   block:

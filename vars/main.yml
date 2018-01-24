@@ -1,2 +1,4 @@
 ---
-# vars file for ansible-role-nextcloud/
+
+nextcloud_app_json_url: https://apps.nextcloud.com/api/v1/platform/11.0.3/apps.json
+

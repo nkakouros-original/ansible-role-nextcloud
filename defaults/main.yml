@@ -3,9 +3,11 @@
 nextcloud_enable: yes
 # Set this to 'no' to completely disable the role
 
-nextcloud_version: ''
+nextcloud_version: 13
 # The major nextcloud version to install. You can use this to upgrade to a new
-# major version as well.
+# major version as well. Even if you set 'nextcloud_download_url' manually (see
+# next option), 'nextcloud_version' should be set as it is also used to
+# correctly install the apps.
 
 nextcloud_download_url: >-
   {% if nextcloud_version != '' %}
@@ -59,3 +61,7 @@ nextcloud_enable_pretty_urls: yes
 
 nextcloud_urls:
   - https://localhost:80/folder
+
+nextcloud_apps: []
+# The ansible apps to install and enable
+# TODO see what happens with core apps

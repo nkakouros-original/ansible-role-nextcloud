@@ -4,6 +4,12 @@
 
 #- include_tasks: install.yml
 
-- include_tasks: configure.yml
+#- include_tasks: configure.yml
 
-- include_tasks: upgrade.yml
+#- include_tasks: upgrade.yml
+
+- include_tasks: apps_manual.yml
+  when: nextcloud_version < 13
+
+- include_tasks: apps_occ.yml
+  when: nextcloud_version >= 13

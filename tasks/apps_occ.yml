@@ -1,0 +1,19 @@
+---
+
+- name: Install apps
+  command: php occ app:install "{{ item }}"
+  with_items: "{{ nextcloud_apps }}"
+  become_user: "{{ nextcloud_file_owner }}"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  register: result
+  failed_when: not (result.stdout | search('already installed') or result.rc == 0)
+  changed_when: result.rc == 0
+
+  # TODO check if app is already enabled to report change correctly
+- name: Enable apps
+  command: php occ app:enable "{{ item }}"
+  with_items: "{{ nextcloud_apps }}"
+  become_user: "{{ nextcloud_file_owner }}"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"

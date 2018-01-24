@@ -1,5 +1,6 @@
 ---
 
+# TODO rewrite parts with | default('...', true)
 # TODO change permissions on config.php and htaccess
 - name: Set the domain in config.php
   block:

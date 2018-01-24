@@ -1,0 +1,37 @@
+---
+
+- name: Download the app json file
+  get_url:
+    url: "{{ nextcloud_app_json_url }}"
+    dest: /tmp
+  when: false
+
+- name: Read the app json file
+  command: cat /tmp/apps.json
+  register: nextcloud_app_json
+
+- name: Parse the app json file
+  set_fact:
+    nextcloud_app_json: "{{ nextcloud_app_json.stdout | from_json }}"
+
+- name: Download apps
+  unarchive:
+    src: >-
+      {{ (nextcloud_app_json
+        | selectattr('id', 'equalto', item)
+        | map(attribute='releases')
+        | list
+        | first
+        | first
+        ).download  }}
+    dest: "{{ nextcloud_installation_dir }}/apps"
+    remote_src: yes
+  with_items: "{{ nextcloud_apps }}"
+
+- name: Enable apps
+  command: php occ app:enable "{{ item }}"
+  with_items: "{{ nextcloud_apps }}"
+  become_user: "{{ nextcloud_file_owner }}"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+
