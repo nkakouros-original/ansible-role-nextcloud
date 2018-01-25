@@ -1,7 +1,7 @@
 Ansible Role: Nextcloud
 =========
 
-Installs Nextcloud. It only does that, it does not install a web server, a db server, etc.
+Installs and upgrades Nextcloud and apps. It only does that, it does not install a web server, a db server, etc.
 
 
 Requirements
