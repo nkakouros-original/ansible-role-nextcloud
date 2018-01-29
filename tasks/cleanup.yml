@@ -1,0 +1,68 @@
+---
+
+- name: Read extra files
+  block:
+    - command: "php occ integrity:check-core --output=json"
+      args:
+        chdir: "{{ nextcloud_installation_dir }}"
+      register: nextcloud_integrity_core
+      become_user: "{{ nextcloud_file_owner }}"
+      failed_when: false
+    - find:
+        paths: "{{ nextcloud_installation_dir }}/apps"
+        file_type: directory
+      register: nextcloud_apps_folders
+    - command: "php occ integrity:check-app {{ item.path | basename }} --output=json"
+      args:
+        chdir: "{{ nextcloud_installation_dir }}"
+      register: nextcloud_integrity_apps
+      with_items: "{{ nextcloud_apps_folders.files }}"
+      become_user: "{{ nextcloud_file_owner }}"
+      failed_when: false
+    - set_fact:
+        nextcloud_extra_files: >-
+          [
+            {%- for result in nextcloud_integrity_apps.results -%}
+              {%- set name=(result.cmd[3]) -%}
+              {%- set files=(result.stdout_lines[-1] | from_json) -%}
+              {%- if files is mapping and 'EXTRA_FILE' in files -%}
+                "{{ []
+                  | zip_longest(files['EXTRA_FILE'].keys(), fillvalue=("apps/" ~ name))
+                  | map('join', '/')
+                  | list
+                  | join('","') }}"
+                  ,
+              {%- endif -%}
+            {%- endfor -%}
+            {%- set files=(nextcloud_integrity_core.stdout_lines[-1] | from_json ) -%}
+            {%- if files is mapping and 'EXTRA_FILE' in files -%}
+              '{{ files["EXTRA_FILE"].keys() | join("','") }}'
+            {%- endif -%}
+          ]
+  when: false
+- name: Delete extra files
+  file:
+    path: "{{ nextcloud_installation_dir }}/{{ item }}"
+    state: absent
+  with_items:
+    - "{{nextcloud_extra_files }}"
+  when: false
+
+- name: Check if upgrade is needed
+  command: php occ status
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  become_user: "{{ nextcloud_file_owner }}"
+  register: nextcloud_status
+  changed_when: >-
+    nextcloud_status.stdout
+      | search('Nextcloud or one of the apps require upgrade')
+  when: not nextcloud_upgrade_always
+
+# "noop" task, just to check variables and notify the handler
+- set_fact:
+    nextcloud_upgrade_always: "{{ nextcloud_upgrade_always }}"
+  changed_when: true
+  when: nextcloud_upgrade_always or
+    nextcloud_status.stdout_lines[0].find('require upgrade') != -1
+  notify: run occ upgrade

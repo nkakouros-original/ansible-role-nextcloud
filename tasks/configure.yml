@@ -1,7 +1,6 @@
 ---
 
 # TODO rewrite parts with | default('...', true)
-# TODO change permissions on config.php and htaccess
 - name: Set the domain in config.php
   block:
     - lineinfile:
@@ -31,4 +30,3 @@
     validate: "/usr/bin/php -l %s"
   notify: "nextcloud update htaccess"
   when: nextcloud_enable_pretty_urls
-  # validate

@@ -7,3 +7,4 @@
           - nextcloud_db_pass != ''
           - nextcloud_admin_pass != ''
         msg: "DB user and admin user passwords cannot be empty"
+

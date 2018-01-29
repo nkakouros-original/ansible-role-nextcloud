@@ -27,18 +27,11 @@
     owner: "{{ nextcloud_file_owner }}"
     group: "{{ nextcloud_file_owner }}"
   changed_when: false
+  when: false
 
 - name: Move nextcloud folder
   command: mv "{{ nextcloud_installation_parent_dir }}" "{{ nextcloud_installation_dir }}"
   when: nextcloud_installation_dir | basename != "nextcloud"
-
-  # TODO see why this returns as changed:
-- name: Set permissions on nextcloud files
-  file:
-    path: "{{ nextcloud_installation_dir }}"
-    recurse: yes
-    state: directory
-    mode: u=rwX,g=rX,o=rX
 
 - name: Install nextcloud
   command: >-
@@ -58,3 +51,30 @@
   become_method: sudo
   become_user: "{{ nextcloud_file_owner }}"
   become: yes
+
+- name: Set file permissions
+  block:
+    - file:
+        path: "{{ nextcloud_installation_dir }}"
+        owner: "{{ nextcloud_file_owner }}"
+        group: "{{ nextcloud_file_owner }}"
+        mode: "u=rwX,g=rX,o-rwx"
+        state: directory
+        recurse: yes
+    - file:
+        path: "{{ nextcloud_installation_dir }}"
+        owner: root
+        group: "{{ nextcloud_file_owner }}"
+        mode: 0750
+        state: directory
+    - file:
+        path: "{{ nextcloud_installation_dir }}/occ"
+        mode: "u+x"
+    - file:
+        path: "{{ nextcloud_installation_dir }}/{{ item }}"
+        owner: root
+        group: "{{ nextcloud_file_owner }}"
+        mode: 0644
+      with_items:
+        - .htaccess
+        - data/.htaccess

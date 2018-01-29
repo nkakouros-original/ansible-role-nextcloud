@@ -7,3 +7,20 @@
   become_method: sudo
   become_user: "{{ nextcloud_file_owner }}"
   listen: nextcloud update htaccess
+
+- name: Set permissions on downloaded apps
+  file:
+    path: "{{ nextcloud_installation_dir }}/apps/"
+    mode: u=rwX,g=rX,o=rX
+    owner: "{{ nextcloud_file_owner }}"
+    group: "{{ nextcloud_file_owner }}"
+    state: directory
+    recurse: yes
+  listen: set app files permissions
+
+- name: Upgrade Nextcloud installation
+  command: php occ upgrade
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  become_user: "{{ nextcloud_file_owner }}"
+  listen: run occ upgrade

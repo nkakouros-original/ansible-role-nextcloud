@@ -64,4 +64,23 @@ nextcloud_urls:
 
 nextcloud_apps: []
 # The ansible apps to install and enable
-# TODO see what happens with core apps
+# It is a list of hashes. Eg
+#
+# nextcloud_apps:
+#   - name: calendar
+#     version: 1.5.7
+#
+# If 'version' is not given, then the latest version available for the installed
+# nextcloud version will be installed.
+
+nextcloud_upgrade_always: false
+# Set this to true to always run Nextcloud's upgrade command, regardless of
+# whether there is sth to be upgraded or not.
+
+nextcloud_users: []
+# The ansible users to create, other than the admin.
+# It is a list of hashes. Eg
+#
+# nextcloud_users:
+#   - name: alice
+#     pass: superstrongnot
