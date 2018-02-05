@@ -1,13 +1,13 @@
 ---
 
-#- include_tasks: assertions.yml
+- include_tasks: assertions.yml
 
-#- include_tasks: install.yml
+- include_tasks: install.yml
 
-#- include_tasks: configure.yml
+- include_tasks: configure.yml
 
-#- import_tasks: apps.yml
+- import_tasks: apps.yml
 
-#- include_tasks: cleanup.yml
+- include_tasks: cleanup.yml
 
 - include_tasks: user.yml
