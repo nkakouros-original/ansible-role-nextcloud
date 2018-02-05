@@ -2,13 +2,13 @@
 
 - name: Extract download file type
   set_fact:
-    download_file_type: "{{ nextcloud_download_url[-3:] }}"
+    download_file_type: "{{ nextcloud_download_url[-4:] }}"
 
 - name: Install unzip
   package:
     name: unzip
     state: present
-  when: download_file_type == 'zip'
+  when: download_file_type == '.zip'
 
 - name: Remove trailing slash from installation directory
   set_fact:
