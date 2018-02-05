@@ -27,7 +27,6 @@
     owner: "{{ nextcloud_file_owner }}"
     group: "{{ nextcloud_file_owner }}"
   changed_when: false
-  when: false
 
 - name: Move nextcloud folder
   command: mv "{{ nextcloud_installation_parent_dir }}" "{{ nextcloud_installation_dir }}"
