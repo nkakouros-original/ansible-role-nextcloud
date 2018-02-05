@@ -7,13 +7,13 @@ Installs and upgrades Nextcloud and apps. It only does that, it does not install
 Requirements
 ------------
 
-While there are a bunch of other roles around, I did not found them useful as they try to do everything in one role, ie setup Apache, then MySQL, then install Nextcloud, etc. This might be useful for users who want to have a Nextcloud instance running as fast as possible. However, I find the approach too limiting as there are many assumptions taking place. 
+While there are a bunch of other roles around, I did not found them useful as they try to do everything in one role, ie setup Apache, then MySQL, then install Nextcloud, etc. This might be useful for users who want to have a Nextcloud instance running as fast as possible. However, I find the approach too limiting as there are many assumptions taking place.
 
 This role does not care where you install Nextcloud. It only downloads, installs and configures Nextcloud itself. Its aim is to be used in a modular way alongside other roles. (Or at least it tries to make no assumptions. If you find any or cannot install nextcloud due to missing functionality, please open an issue or a PR. Currently it has been tested only on Ubuntu 16.04).
 
 See the [Example playbooks](#example_playbooks) on how a complete playbook that uses 3rd-party roles might look like.
 
-Role Variables
+Rolo Variables
 --------------
 
 ```yaml
@@ -76,6 +76,29 @@ nextcloud_enable_pretty_urls: yes
 
 nextcloud_urls:
   - https://localhost:80/folder
+
+nextcloud_apps: []
+# The ansible apps to install and enable
+# It is a list of hashes. Eg
+#
+# nextcloud_apps:
+#   - name: calendar
+#     version: 1.5.7
+#
+# If 'version' is not given, then the latest version available for the installed
+# nextcloud version will be installed.
+
+nextcloud_upgrade_always: false
+# Set this to true to always run Nextcloud's upgrade command, regardless of
+# whether there is sth to be upgraded or not.
+
+nextcloud_users: []
+# The ansible users to create, other than the admin.
+# It is a list of hashes. Eg
+#
+# nextcloud_users:
+#   - name: alice
+#     pass: superstrongnot
 ```
 
 Example Playbook
@@ -83,7 +106,7 @@ Example Playbook
 
 Here is a complete example of how to use this role in conjuction with other roles in order to get a complete server environment running Nextcloud. In this example, I use the well known [geerlingguy](https://github.com/geerlingguy/) roles to install apache, mysql and php, alongside Nextcloud, on Ubuntu 16.04.
 
-```yaml
+```ansible
 - hosts: server
   any_errors_fatal: true
   become: yes
@@ -152,9 +175,18 @@ Here is a complete example of how to use this role in conjuction with other role
         | zip_longest(nextcloud_urls_tmp, fillvalue='http://')
         | map('join')
         | list}}
+    nextcloud_apps:
+      - name: calendar
+        version: 1.5.4
+      - name: spreedme
+    nextcloud_version: 12
+    nextcloud_users:
+      - name: nikos
+        pass: "nikos-pass"
 ```
 
 License
 -------
 
 GPLv3
+
