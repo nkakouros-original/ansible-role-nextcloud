@@ -4,10 +4,12 @@
 
 - include_tasks: install.yml
 
-- include_tasks: configure.yml
+- include_tasks: setup.yml
 
 - import_tasks: apps.yml
 
 - include_tasks: cleanup.yml
 
 - include_tasks: user.yml
+
+- include_tasks: user_config.yml

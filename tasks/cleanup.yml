@@ -19,6 +19,7 @@
       with_items: "{{ nextcloud_apps_folders.files }}"
       become_user: "{{ nextcloud_file_owner }}"
       failed_when: false
+  # TODO make this a var: in the next task
     - set_fact:
         nextcloud_extra_files: >-
           [
