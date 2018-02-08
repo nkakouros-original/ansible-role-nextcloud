@@ -90,3 +90,10 @@ nextcloud_users: []
 #           show: 0
 #       - calendar:
 #           showWeekNr: 'yes'
+#
+# App and core configuration happens per user. To find out what config options are
+# available, either make the changes manually and then the oc_preferences table
+# in your nextcloud database or use your browsers inspection tool to inspect the
+# form element in the nextcloud admin interface that you want to change. Try to
+# find the ng-model attribute of the <input> tag. It should be sth like 
+# 'settingsShowWeekNr'. The config name in this case will be 'showWeekNr'.
