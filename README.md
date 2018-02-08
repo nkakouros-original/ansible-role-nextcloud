@@ -13,7 +13,7 @@ This role does not care where you install Nextcloud. It only downloads, installs
 
 See the [Example playbooks](#example_playbooks) on how a complete playbook that uses 3rd-party roles might look like.
 
-Rolo Variables
+Role Variables
 --------------
 
 ```yaml
@@ -183,10 +183,17 @@ Here is a complete example of how to use this role in conjuction with other role
     nextcloud_users:
       - name: nikos
         pass: "nikos-pass"
+        display_name: Nikos Surname
+        settings:
+          - firstrunwizard:
+              show: 0
+          - calendar:
+              showWeekNr: 'yes'
 ```
 
 License
 -------
 
 GPLv3
+
 

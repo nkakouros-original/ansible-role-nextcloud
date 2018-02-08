@@ -84,3 +84,9 @@ nextcloud_users: []
 # nextcloud_users:
 #   - name: alice
 #     pass: superstrongnot
+#     display_name: Alice B. Charlie
+#     settings:
+#       - firstrunwizard:
+#           show: 0
+#       - calendar:
+#           showWeekNr: 'yes'

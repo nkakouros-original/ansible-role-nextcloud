@@ -1,7 +1,11 @@
 ---
 
 - name: Create users
-  command: php occ user:add "{{ item.name }}" --password-from-env
+  command: >-
+    php occ user:add
+      "{{ item.name }}"
+      --display-name "{{ item.display_name }}"
+      --password-from-env
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   become_user: "{{ nextcloud_file_owner }}"
