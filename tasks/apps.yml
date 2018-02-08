@@ -9,7 +9,7 @@
   changed_when: false
 
 # There might be a notice for required updates. This notice will break json
-# parging.
+# parsing.
 - name: Remove non-json text from command output
   set_fact:
     nextcloud_shipped_apps: >-

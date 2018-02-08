@@ -84,6 +84,7 @@ nextcloud_users: []
 # nextcloud_users:
 #   - name: alice
 #     pass: superstrongnot
+#     resetpassword: yes  # to reset the passsword every time the playbook is run
 #     display_name: Alice B. Charlie
 #     settings:
 #       - firstrunwizard:
@@ -95,5 +96,5 @@ nextcloud_users: []
 # available, either make the changes manually and then the oc_preferences table
 # in your nextcloud database or use your browsers inspection tool to inspect the
 # form element in the nextcloud admin interface that you want to change. Try to
-# find the ng-model attribute of the <input> tag. It should be sth like 
+# find the ng-model attribute of the <input> tag. It should be sth like
 # 'settingsShowWeekNr'. The config name in this case will be 'showWeekNr'.
