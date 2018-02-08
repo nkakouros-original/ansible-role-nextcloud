@@ -1,12 +1,24 @@
 ---
 
 - name: Update .htaccess
-  command: php occ maintenance:update:htaccess --no-interaction
-  args:
-    chdir: "{{ nextcloud_installation_dir }}"
-  become_method: sudo
-  become_user: "{{ nextcloud_file_owner }}"
-  listen: nextcloud update htaccess
+  block:
+    - file:
+        path: "{{ nextcloud_installation_dir }}/{{ item }}"
+        mode: g+w
+      with_items:
+        - .htaccess
+        - data/.htaccess
+    - command: php occ maintenance:update:htaccess --no-interaction
+      args:
+        chdir: "{{ nextcloud_installation_dir }}"
+      listen: nextcloud update htaccess
+      become_user: "{{ nextcloud_file_owner }}"
+    - file:
+        path: "{{ nextcloud_installation_dir }}/{{ item }}"
+        mode: g-w
+      with_items:
+        - .htaccess
+        - data/.htaccess
 
 - name: Set permissions on downloaded apps
   file:
