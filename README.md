@@ -103,6 +103,7 @@ nextcloud_users: []
 # nextcloud_users:
 #   - name: alice
 #     pass: superstrongnot
+#     resetpassword: yes  # to reset the passsword every time the playbook is run
 #     display_name: Alice B. Charlie
 #     settings:
 #       - firstrunwizard:
@@ -201,6 +202,7 @@ Here is a complete example of how to use this role in conjuction with other role
     nextcloud_users:
       - name: nikos
         pass: "nikos-pass"
+        resetpassword: yes
         display_name: Nikos Surname
         settings:
           - firstrunwizard:
