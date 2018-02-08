@@ -19,16 +19,15 @@
       with_items: "{{ nextcloud_apps_folders.files }}"
       become_user: "{{ nextcloud_file_owner }}"
       failed_when: false
-  # TODO make this a var: in the next task
     - set_fact:
         nextcloud_extra_files: >-
           [
             {%- for result in nextcloud_integrity_apps.results -%}
-              {%- set name=(result.cmd[3]) -%}
+              {%- set appname=(result.cmd[3]) -%}
               {%- set files=(result.stdout_lines[-1] | from_json) -%}
               {%- if files is mapping and 'EXTRA_FILE' in files -%}
                 "{{ []
-                  | zip_longest(files['EXTRA_FILE'].keys(), fillvalue=("apps/" ~ name))
+                  | zip_longest(files['EXTRA_FILE'].keys(), fillvalue=("apps/" ~ appname))
                   | map('join', '/')
                   | list
                   | join('","') }}"

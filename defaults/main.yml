@@ -61,6 +61,9 @@ nextcloud_enable_pretty_urls: yes
 
 nextcloud_urls:
   - https://localhost:80/folder
+# This is a list of urls where your nextcloud installation should be accessible.
+# You would normally need only one. If you specify more than one, the first one
+# will be as the "main" one, for pretty urls, etc.
 
 nextcloud_apps: []
 # The ansible apps to install and enable
