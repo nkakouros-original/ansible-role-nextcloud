@@ -10,11 +10,11 @@ nextcloud_version: 13
 # correctly install the apps.
 
 nextcloud_download_url: >-
-  {% if nextcloud_version != '' %}
+  {%- if nextcloud_version != '' -%}
     https://download.nextcloud.com/server/releases/latest-{{ nextcloud_version }}.zip
-  {% else %}
-  https://download.nextcloud.com/server/releases/latest.zip
-  {% endif %}
+  {%- else -%}
+    https://download.nextcloud.com/server/releases/latest.zip
+  {%- endif -%}
 
 # The url to download nextcloud from. Currently only the latest stable version
 # is supported.
