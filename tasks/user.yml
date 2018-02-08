@@ -17,8 +17,8 @@
     nextcloud_online_users: >-
       {{
         nextcloud_online_users.results
-        | map('slice', 'stdout')
-        | map('regex_replace', "^[^{]*(.*)']$", '\1')
+        | map(attribute='stdout')
+        | map('regex_replace', "^[^{]*(.*)$", '\1')
         | map('from_json')
         | list
       }}
