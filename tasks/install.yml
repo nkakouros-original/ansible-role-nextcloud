@@ -47,9 +47,7 @@
   args:
     chdir: "{{ nextcloud_installation_dir }}"
     creates: "{{ nextcloud_installation_dir }}/config/config.php"
-  become_method: sudo
   become_user: "{{ nextcloud_file_owner }}"
-  become: yes
 
 - name: Set file permissions
   block:

@@ -39,14 +39,13 @@
               '{{ files["EXTRA_FILE"].keys() | join("','") }}'
             {%- endif -%}
           ]
-  when: false
+
 - name: Delete extra files
   file:
     path: "{{ nextcloud_installation_dir }}/{{ item }}"
     state: absent
   with_items:
     - "{{nextcloud_extra_files }}"
-  when: false
 
 - name: Check if upgrade is needed
   command: php occ status
