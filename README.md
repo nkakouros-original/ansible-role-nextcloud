@@ -6,6 +6,7 @@ Installs and upgrades Nextcloud and apps. It only does that, it does not install
 
 Requirements
 ------------
+Ansible >2.5 (currently development version)
 
 While there are a bunch of other roles around, I did not found them useful as they try to do everything in one role, ie setup Apache, then MySQL, then install Nextcloud, etc. This might be useful for users who want to have a Nextcloud instance running as fast as possible. However, I find the approach too limiting as there are many assumptions taking place.
 
