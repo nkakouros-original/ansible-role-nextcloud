@@ -15,21 +15,24 @@ See the [Example playbooks](#example_playbooks) on how a complete playbook that 
 
 Role Variables
 --------------
+(copied from defaults/main.yml)
 
 ```yaml
 nextcloud_enable: yes
 # Set this to 'no' to completely disable the role
 
-nextcloud_version: ''
+nextcloud_version: 13
 # The major nextcloud version to install. You can use this to upgrade to a new
-# major version as well.
+# major version as well. Even if you set 'nextcloud_download_url' manually (see
+# next option), 'nextcloud_version' should be set as it is also used to
+# correctly install the apps.
 
 nextcloud_download_url: >-
-  {% if nextcloud_version != '' %}
+  {%- if nextcloud_version != '' -%}
     https://download.nextcloud.com/server/releases/latest-{{ nextcloud_version }}.zip
-  {% else %}
-  https://download.nextcloud.com/server/releases/latest.zip
-  {% endif %}
+  {%- else -%}
+    https://download.nextcloud.com/server/releases/latest.zip
+  {%- endif -%}
 
 # The url to download nextcloud from. Currently only the latest stable version
 # is supported.
@@ -99,6 +102,20 @@ nextcloud_users: []
 # nextcloud_users:
 #   - name: alice
 #     pass: superstrongnot
+#     display_name: Alice B. Charlie
+#     settings:
+#       - firstrunwizard:
+#           show: 0
+#       - calendar:
+#           showWeekNr: 'yes'
+#
+# App and core configuration happens per user. To find out what config options are
+# available, either make the changes manually and then the oc_preferences table
+# in your nextcloud database or use your browsers inspection tool to inspect the
+# form element in the nextcloud admin interface that you want to change. Try to
+# find the ng-model attribute of the <input> tag. It should be sth like 
+# 'settingsShowWeekNr'. The config name in this case will be 'showWeekNr'.
+
 ```
 
 Example Playbook
