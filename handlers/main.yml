@@ -3,11 +3,8 @@
 - name: Update .htaccess
   block:
     - file:
-        path: "{{ nextcloud_installation_dir }}/{{ item }}"
+        path: "{{ nextcloud_installation_dir }}/.htaccess"
         mode: g+w
-      with_items:
-        - .htaccess
-        - data/.htaccess
       listen: nextcloud update htaccess
     - command: php occ maintenance:update:htaccess --no-interaction
       args:
@@ -15,11 +12,8 @@
       listen: nextcloud update htaccess
       become_user: "{{ nextcloud_file_owner }}"
     - file:
-        path: "{{ nextcloud_installation_dir }}/{{ item }}"
+        path: "{{ nextcloud_installation_dir }}/.htaccess"
         mode: g-w
-      with_items:
-        - .htaccess
-        - data/.htaccess
       listen: nextcloud update htaccess
 
 - name: Set permissions on downloaded apps

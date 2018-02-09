@@ -68,10 +68,7 @@
         path: "{{ nextcloud_installation_dir }}/occ"
         mode: "u+x"
     - file:
-        path: "{{ nextcloud_installation_dir }}/{{ item }}"
+        path: "{{ nextcloud_installation_dir }}/.htaccess"
         owner: root
         group: "{{ nextcloud_file_owner }}"
         mode: 0644
-      with_items:
-        - .htaccess
-        - data/.htaccess
