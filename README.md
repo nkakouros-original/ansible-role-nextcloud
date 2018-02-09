@@ -19,7 +19,7 @@ While there are a bunch of other roles around, I did not found them useful as th
 
 This role does not care where you install Nextcloud. It only downloads, installs and configures Nextcloud itself. Its aim is to be used in a modular way alongside other roles. (Or at least it tries to make no assumptions. If you find any or cannot install nextcloud due to missing functionality, please open an issue or a PR. Currently it has been tested only on Ubuntu 16.04).
 
-See the [Example playbooks](#example_playbooks) on how a complete playbook that uses 3rd-party roles might look like.
+See the [Example playbook](#example-playbook) on how a complete playbook that uses 3rd-party roles might look like.
 
 Role Variables
 --------------
