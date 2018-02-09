@@ -5,8 +5,11 @@
     - command: python -V
       delegate_to: localhost
       register: localhost_python
+      changed_when: false
     - set_fact:
         localhost_python: "{{ localhost_python.stdout | regex_replace('^Python ([0-9])\\..*$', '\\1') }}"
+      changed_when: false
+
 
 - name: Create user settings list
   set_fact:

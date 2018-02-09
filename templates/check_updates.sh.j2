@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+# Taken and modified from:
+# https://spielwiese.la-evento.com/xelasblog/archives/75-Mailbenachrichtigung-bei-verfuegbaren-Nextcloud-Updates.html
+
+###
+# Full path to version file.
+VERSFILE="{{ nextcloud_installation_dir }}/version.php"
+# Your php version, replace "." with "x"
+PHP="$(php -v | grep "^PHP" | grep -Eo "[0-9]\.[0-9]\.[0-9]{1,2}")"
+PHP="${PHP//./x}"
+
+TMPFILE="$(mktemp /tmp/nc-updatecheck.XXXXX)"
+URLBASE='https://updates.nextcloud.org/updater_server/?version='
+VERSION="$(grep 'OC_Version =' "$VERSFILE" | awk '{print $NF}'| sed -e 's/;//' -e 's/array(//' -e 's/)//' -e 's/ //g')"
+CURRENT="$(echo "$VERSION" | sed -e 's/,/./g')"
+VERSIONURL="$(echo "$VERSION" | sed -e 's/,/x/g')"
+BUILD_RAW="$(grep OC_Build "$VERSFILE" | cut -d ' ' -f 3,4 | sed -e 's/;//' -e "s/'//g")"
+BUILD_ENC="$(php -r "print urlencode(\"$BUILD_RAW\");";)"
+URL="${URLBASE}${VERSIONURL}xxxstablexx${BUILD_ENC}x${PHP}"
+
+curl -s -A 'Nextcloud Updater' "$URL" > "$TMPFILE"
+
+if [[ -s "$TMPFILE" ]]; then
+  echo -n "UPDATE_AVAILABLE"
+else
+  echo -n "NO_UPDATE"
+fi

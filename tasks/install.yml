@@ -19,6 +19,22 @@
   set_fact:
     nextcloud_installation_parent_dir: "{{ nextcloud_installation_dir | dirname }}"
 
+- name: Download nextcloud releases list
+  get_url:
+    url: https://github.com/nextcloud/server/releases.atom
+    dest: /tmp/
+
+- name: Check if update is available
+  block:
+    - template:
+        src: check_updates.sh.j2
+        dest: /tmp/check_updates.sh
+        mode: 0700
+      changed_when: false
+    - command: /tmp/check_updates.sh
+      register: update_status
+      changed_when: false
+
 - name: Download nextcloud
   unarchive:
     src: "{{ nextcloud_download_url }}"
@@ -26,11 +42,13 @@
     remote_src: yes
     owner: "{{ nextcloud_file_owner }}"
     group: "{{ nextcloud_file_owner }}"
-  changed_when: false
+  when: update_status.stdout == "UPDATE_AVAILABLE"
 
 - name: Move nextcloud folder
   command: mv "{{ nextcloud_installation_parent_dir }}" "{{ nextcloud_installation_dir }}"
-  when: nextcloud_installation_dir | basename != "nextcloud"
+  when:
+    - update_status.stdout == "UPDATE_AVAILABLE"
+    - nextcloud_installation_dir | basename != "nextcloud"
 
 - name: Install nextcloud
   command: >-
@@ -51,13 +69,26 @@
 
 - name: Set file permissions
   block:
-    - file:
+    - find:
+        # We are doing the next 4 task instead of only one or two to have correct change detection
         path: "{{ nextcloud_installation_dir }}"
+        file_type: any
+      register: nextcloud_installation_files
+    - file:
+        path: "{{ item.path }}"
         owner: "{{ nextcloud_file_owner }}"
         group: "{{ nextcloud_file_owner }}"
         mode: "u=rwX,g=rX,o-rwx"
         state: directory
         recurse: yes
+      with_items: "{{ nextcloud_installation_files.files | selectattr('isdir') | list }}"
+    - file:
+        path: "{{ item.path }}"
+        owner: "{{ nextcloud_file_owner }}"
+        group: "{{ nextcloud_file_owner }}"
+        mode: "u=rw,g=r,o-rwx"
+      with_items: "{{ nextcloud_installation_files.files | selectattr('isdir', 'equalto', 'false') | list }}"
+      when: item.path != '.htaccess'
     - file:
         path: "{{ nextcloud_installation_dir }}"
         owner: root

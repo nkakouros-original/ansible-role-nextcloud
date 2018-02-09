@@ -8,6 +8,7 @@
       register: nextcloud_integrity_core
       become_user: "{{ nextcloud_file_owner }}"
       failed_when: false
+      changed_when: false
     - find:
         paths: "{{ nextcloud_installation_dir }}/apps"
         file_type: directory
@@ -19,6 +20,7 @@
       with_items: "{{ nextcloud_apps_folders.files }}"
       become_user: "{{ nextcloud_file_owner }}"
       failed_when: false
+      changed_when: false
     - set_fact:
         nextcloud_extra_files: >-
           [

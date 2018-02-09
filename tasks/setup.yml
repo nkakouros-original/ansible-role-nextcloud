@@ -7,8 +7,8 @@
         path: "{{ nextcloud_installation_dir }}/config/config.php"
         regexp: "'overwrite\\.cli\\.url' => '[^\\s]*',"
         line: "  'overwrite.cli.url' => '{{ nextcloud_urls[0] | regex_replace(':[0-9]{2,5}', '') }}',"
-        insertbefore: '\);'
         validate: "/usr/bin/php -l %s"
+        insertbefore: "'maintenance' => "
       notify: "nextcloud update htaccess"
     - blockinfile:
         path: "{{ nextcloud_installation_dir }}/config/config.php"
@@ -17,7 +17,7 @@
               '{{ nextcloud_urls | map("urlsplit", 'hostname') | join("',!    '") | regex_replace('!', '\n') }}'
             ),
         marker: "  # {mark} ANSIBLE MANAGED BLOCK"
-        insertbefore: '\);'
+        insertafter: "'maintenance' => "
         validate: "/usr/bin/php -l %s"
       notify: "nextcloud update htaccess"
 
