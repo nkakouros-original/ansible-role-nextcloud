@@ -3,10 +3,17 @@ Ansible Role: Nextcloud
 
 Installs and upgrades Nextcloud and apps. It only does that, it does not install a web server, a db server, etc.
 
+Features
+--------
+
+- installs, updates and configures Nextcloud core
+- installs, updates and configures Nextcloud apps available on the app store
+- creates and updates users
 
 Requirements
 ------------
-Ansible >2.4
+
+Ansible >= 2.4
 
 While there are a bunch of other roles around, I did not found them useful as they try to do everything in one role, ie setup Apache, then MySQL, then install Nextcloud, etc. This might be useful for users who want to have a Nextcloud instance running as fast as possible. However, I find the approach too limiting as there are many assumptions taking place.
 
@@ -16,6 +23,7 @@ See the [Example playbooks](#example_playbooks) on how a complete playbook that 
 
 Role Variables
 --------------
+
 (copied from defaults/main.yml)
 
 ```yaml
@@ -90,7 +98,7 @@ nextcloud_apps: []
 #     version: 1.5.7
 #
 # If 'version' is not given, then the latest version available for the installed
-# nextcloud version will be installed.
+# nextcloud version will be installed and updated on each plabook run.
 
 nextcloud_upgrade_always: false
 # Set this to true to always run Nextcloud's upgrade command, regardless of
