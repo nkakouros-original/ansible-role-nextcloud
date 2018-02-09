@@ -133,7 +133,7 @@ Example Playbook
 
 Here is a complete example of how to use this role in conjuction with other roles in order to get a complete server environment running Nextcloud. In this example, I use the well known [geerlingguy](https://github.com/geerlingguy/) roles to install apache, mysql and php, alongside Nextcloud, on Ubuntu 16.04.
 
-```ansible
+```yaml
 - hosts: server
   any_errors_fatal: true
   become: yes
