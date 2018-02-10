@@ -120,8 +120,10 @@ nextcloud_users: []
 #           showWeekNr: 'yes'
 #
 # App and core configuration happens per user. To find out what config options are
-# available, either make the changes manually and then the oc_preferences table
-# in your nextcloud database or use your browsers inspection tool to inspect the
+# available, there are two options. The best is to make the changes manually in
+# the admin interface and then check the oc_preferences and oc_appconfig tables
+# in your nextcloud database to see what changed and get the names from there.
+# The second option is to use your browsers inspection tool to inspect the
 # form element in the nextcloud admin interface that you want to change. Try to
 # find the ng-model attribute of the <input> tag. It should be sth like 
 # 'settingsShowWeekNr'. The config name in this case will be 'showWeekNr'.
