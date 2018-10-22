@@ -27,13 +27,15 @@ Versions
 
 - _Supported Nextcloud versions_: Each release of the role will support all officially supported Nextcloud versions, starting from version 14. That is, versions older than Nextcloud 14 will not be supported ever by this role (for instance Nextcloud 13, although it is supported officially as of this writing). Also, with each new major version of Nextcloud, the version that this role installs by default will be updated to match that latest major release.
 
-- _Supported Ansible versions_: I am using an installation of Ansible that is daily checked out from their [development branch](https://github.com/ansible/ansible/tree/devel/). With each new Ansible stable version (currently 2.7), a new release of this role will be created that will be compatible with that new Ansible version. Work following such a release will take place with the in-development next version of Ansible. 
+- _Supported Ansible versions_: I am using an installation of Ansible that is daily checked out from their [development branch](https://github.com/ansible/ansible/tree/devel/). With each new Ansible stable version (currently 2.7), a new release of this role will be created that will be compatible with that new Ansible version. Work following such a release will take place with the in-development next version of Ansible and might use new Ansible features.
 
 For this above reasons, role releases will have names such as `v14-2.7-1.0`, where:
 
-- `14` is the versions of Ansible that this role will intsall by default
-- `2.7` is the ansible version that the release will be compatible with
+- `14` is the version of Nextcloud that this role will install by default
+- `2.7` is the Ansible version that the release will be compatible with
 - `1.0` is semantic versioning of the role itself (reset when either of the two components above gets updated)
+
+The above release will of course also be compatible with later Ansible versions that are compatible with Ansible 2.7.
 
 Role Variables
 --------------
