@@ -34,7 +34,7 @@ For this above reasons, role releases will have names such as `14-2.7`, where `1
 Role Variables
 --------------
 
-(copied from defaults/main.yml)
+(copied from [defaults/main.yml](https://github.com/tterranigma/ansible-role-nextcloud/blob/master/defaults/main.yml))
 
 ```yaml
 ---
