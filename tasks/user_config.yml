@@ -11,6 +11,7 @@
       changed_when: false
 
 
+# TODO simplify this with filters
 - name: Create user settings list
   set_fact:
     user_settings: >-
@@ -42,7 +43,7 @@
   failed_when: false
   changed_when: false
   register: user_config_values
-  with_items: "{{ user_settings }}"
+  loop: "{{ user_settings }}"
 
 - name: Enable user settings
   command: "php occ user:setting {{ item.0.user }} {{ item.0.app }} {{ item.0.key }} {{ item.0.value }}"

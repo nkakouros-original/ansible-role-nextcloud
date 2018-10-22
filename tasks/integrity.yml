@@ -9,18 +9,21 @@
       become_user: "{{ nextcloud_file_owner }}"
       failed_when: false
       changed_when: false
-    - find:
-        paths: "{{ nextcloud_installation_dir }}/apps"
-        file_type: directory
-      register: nextcloud_apps_folders
-    - command: "php occ integrity:check-app {{ item.path | basename }} --output=json"
+    - command: "php occ integrity:check-app {{ item }} --output=json"
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       register: nextcloud_integrity_apps
-      with_items: "{{ nextcloud_apps_folders.files }}"
-      become_user: "{{ nextcloud_file_owner }}"
-      failed_when: false
+      loop: >-
+        {{
+          (
+            nextcloud_installed_apps.enabled
+            | combine(nextcloud_installed_apps.disabled)
+          ).keys()
+          | list
+        }}
       changed_when: false
+      failed_when: false
+      become_user: "{{ nextcloud_file_owner }}"
     - set_fact:
         nextcloud_extra_files: >-
           [
@@ -42,28 +45,11 @@
             {%- endif -%}
           ]
 
+# Using `command` instead of `file` with a loop to make it (much) faster.
 - name: Delete extra files
-  file:
-    path: "{{ nextcloud_installation_dir }}/{{ item }}"
-    state: absent
-  with_items:
-    - "{{nextcloud_extra_files }}"
-
-- name: Check if upgrade is needed
-  command: php occ status
+  command: "rm {{ nextcloud_extra_files | join(' ') }}"
   args:
     chdir: "{{ nextcloud_installation_dir }}"
-  become_user: "{{ nextcloud_file_owner }}"
-  register: nextcloud_status
-  changed_when: >-
-    nextcloud_status.stdout
-      | search('Nextcloud or one of the apps require upgrade')
-  when: not nextcloud_upgrade_always
+  when: nextcloud_extra_files | length > 0
 
-# "noop" task, just to check variables and notify the handler
-- set_fact:
-    nextcloud_upgrade_always: "{{ nextcloud_upgrade_always }}"
-  changed_when: true
-  when: nextcloud_upgrade_always or
-    nextcloud_status.stdout_lines[0].find('require upgrade') != -1
-  notify: run occ upgrade
+# TODO rescan after cleanup as in the status page removed files are still listed.

@@ -1,2 +1,27 @@
 ---
 
+# This provides defaults for `nextcloud_database` keys that the user may have
+# skipped. In `defaults/main.yml` all keys are set to defaults, but if the user
+# specifies in their playbook the `nextcloud_database` variable, then those
+# defaults are overwritten.
+_nextcloud_database:
+  backend: mysql
+  # The database server that will be used. It should be already installed and
+  # the database should already exist. For 'mariadb', set this to 'mysql'.
+
+  name: nextcloud
+  # The name of the database nextcloud will use. It should already exist on the
+  # system.
+
+  user: nextcloud
+  # The database user that nextcloud will use to access the database. The user
+  # should already exist in the database backend (together with their password).
+
+  pass: ''
+  # The database user's password. This variable should not be empty.
+
+  host: localhost
+  # The database host
+
+  port: 3306
+  # The port the db server listens on

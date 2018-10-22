@@ -1,0 +1,23 @@
+---
+
+- name: Get global preferences
+  command: php occ config:list --output=json
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  register: _nextcloud_old_preferences
+  changed_when: no
+  become_user: "{{ nextcloud_file_owner }}"
+
+- set_fact:
+    _nextcloud_old_preferences: "{{ _nextcloud_old_preferences.stdout | from_json }}"
+
+- name: Set up global preferences
+  command: php occ config:app:set core "{{ item.key }}" --value "{{ item.value }}"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  when: >-
+    _nextcloud_old_preferences.apps.core[item.key]
+      | default('//__UNDEFINED__//')
+    != item.value
+  loop: "{{ nextcloud_config_global | dict2items }}"
+  become_user: "{{ nextcloud_file_owner }}"

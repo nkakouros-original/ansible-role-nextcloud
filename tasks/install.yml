@@ -1,29 +1,16 @@
 ---
 
-- name: Extract download file type
-  set_fact:
-    download_file_type: "{{ nextcloud_download_url[-4:] }}"
-
 - name: Install unzip
   package:
     name: unzip
     state: present
   when: download_file_type == '.zip'
 
-- name: Remove trailing slash from installation directory
-  set_fact:
-    nextcloud_installation_dir: >-
-      {{ nextcloud_installation_dir | regex_replace('/$', '') }}
+- name: Install imagemagick
+  package:
+    name: imagemagick
 
-- name: Read installation parent dir
-  set_fact:
-    nextcloud_installation_parent_dir: "{{ nextcloud_installation_dir | dirname }}"
-
-- name: Download nextcloud releases list
-  get_url:
-    url: https://github.com/nextcloud/server/releases.atom
-    dest: /tmp/
-
+# TODO find a more intelligent way to do version check
 - name: Check if update is available
   block:
     - template:
@@ -44,8 +31,11 @@
     group: "{{ nextcloud_file_owner }}"
   when: update_status.stdout == "UPDATE_AVAILABLE"
 
+# When extracting the downloaded nextcloud archive, the files are placed under
+# a nextcloud folder. Here, we rename this folder if the user has specified a
+# different folder.
 - name: Move nextcloud folder
-  command: mv "{{ nextcloud_installation_parent_dir }}" "{{ nextcloud_installation_dir }}"
+  command: mv "{{ nextcloud_installation_parent_dir }}/nextcloud" "{{ nextcloud_installation_dir }}"
   when:
     - update_status.stdout == "UPDATE_AVAILABLE"
     - nextcloud_installation_dir | basename != "nextcloud"
@@ -53,12 +43,12 @@
 - name: Install nextcloud
   command: >-
     php occ maintenance:install --no-interaction
-      --database "{{ nextcloud_db_backend }}"
-      --database-name "{{ nextcloud_db_name }}"
-      --database-user "{{ nextcloud_db_user }}"
-      --database-pass "{{ nextcloud_db_pass }}"
-      --database-host "{{ nextcloud_db_host }}"
-      --database-port "{{ nextcloud_db_port }}"
+      --database "{{ nextcloud_database.backend }}"
+      --database-name "{{ nextcloud_database.name }}"
+      --database-user "{{ nextcloud_database.user }}"
+      --database-pass "{{ nextcloud_database.pass }}"
+      --database-host "{{ nextcloud_database.host }}"
+      --database-port "{{ nextcloud_database.port }}"
       --admin-user "{{ nextcloud_admin_user }}"
       --admin-pass "{{ nextcloud_admin_pass }}"
       --data-dir "{{ nextcloud_data_dir }}"
@@ -70,7 +60,6 @@
 - name: Set file permissions
   block:
     - find:
-        # We are doing the next 4 task instead of only one or two to have correct change detection
         path: "{{ nextcloud_installation_dir }}"
         file_type: any
       register: nextcloud_installation_files
@@ -81,14 +70,21 @@
         mode: "u=rwX,g=rX,o-rwx"
         state: directory
         recurse: yes
-      with_items: "{{ nextcloud_installation_files.files | selectattr('isdir') | list }}"
-    - file:
-        path: "{{ item.path }}"
-        owner: "{{ nextcloud_file_owner }}"
-        group: "{{ nextcloud_file_owner }}"
-        mode: "u=rw,g=r,o-rwx"
-      with_items: "{{ nextcloud_installation_files.files | selectattr('isdir', 'equalto', 'false') | list }}"
-      when: item.path != '.htaccess'
+      loop: "{{ nextcloud_installation_files.files | selectattr('isdir') | list }}"
+    # For files, we are using `shell` as `file` with a loop would take ages to
+    # complete.
+    - shell: >-
+        find "{{ nextcloud_installation_dir }}" \
+          -type f \
+          ! -name '.htaccess' \
+          -exec chown {{ nextcloud_file_owner }}:{{ nextcloud_file_owner }} {} \;
+      changed_when: no
+    - shell: >-
+        find "{{ nextcloud_installation_dir }}" \
+          -type f \
+          ! -name '.htaccess' \
+          -exec chmod 0640 {} \;
+      changed_when: no
     - file:
         path: "{{ nextcloud_installation_dir }}"
         owner: root

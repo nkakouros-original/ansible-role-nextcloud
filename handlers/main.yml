@@ -26,9 +26,3 @@
     recurse: yes
   listen: set app files permissions
 
-- name: Upgrade Nextcloud installation
-  command: php occ upgrade
-  args:
-    chdir: "{{ nextcloud_installation_dir }}"
-  become_user: "{{ nextcloud_file_owner }}"
-  listen: run occ upgrade

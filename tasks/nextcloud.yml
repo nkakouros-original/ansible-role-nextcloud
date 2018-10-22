@@ -1,6 +1,6 @@
 ---
 
-- include_tasks: assertions.yml
+- include_tasks: variables.yml
 
 - include_tasks: install.yml
 
@@ -8,8 +8,14 @@
 
 - import_tasks: apps.yml
 
-- include_tasks: cleanup.yml
+- include_tasks: integrity.yml
+
+- include_tasks: upgrade.yml
+
+- include_tasks: config.yml
 
 - include_tasks: user.yml
+
+- include_tasks: group.yml
 
 - include_tasks: user_config.yml

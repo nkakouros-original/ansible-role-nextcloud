@@ -51,6 +51,8 @@
     get_url:
       url: "{{ nextcloud_app_store_json_url }}"
       dest: /tmp
+    register: result
+    until: result is success
 
   - name: Read the app json file
     command: cat /tmp/apps.json

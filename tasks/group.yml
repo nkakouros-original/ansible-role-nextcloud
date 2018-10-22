@@ -1,0 +1,48 @@
+---
+
+- name: Create user groups
+  command: php occ group:add "{{ item }}"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  loop: "{{ nextcloud_users | map(attribute='groups') | flatten | list | unique }}"
+  register: result
+  changed_when: result is success
+  failed_when: result is failed and result.stdout is not search('already exists')
+  become_user: "{{ nextcloud_file_owner }}"
+
+- name: Get user info
+  command: php occ user:info "{{ item.name }}" --output=json
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  register: _nextcloud_user_info
+  loop: "{{ nextcloud_users }}"
+  changed_when: no
+  become_user: "{{ nextcloud_file_owner }}"
+
+- debug:
+    msg: >-
+      {{
+      (
+      _nextcloud_user_info.results
+      | map(attribute='stdout')
+      | map('from_json')
+      | selectattr('user_id', 'equalto', (nextcloud_users | subelements('groups'))[0][0]['name'])
+      | first
+      )
+      }}
+
+- name: Add users to groups
+  command: php occ group:adduser "{{ item.1 }}" "{{ item.0.name }}"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  loop: "{{ nextcloud_users | subelements('groups') }}"
+  when: >-
+    item.1 not in
+    (
+      _nextcloud_user_info.results
+      | map(attribute='stdout')
+      | map('from_json')
+      | selectattr('user_id', 'equalto', item.0.name)
+      | first
+    ).groups
+  become_user: "{{ nextcloud_file_owner }}"

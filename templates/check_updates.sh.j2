@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Taken and modified from:
 # https://spielwiese.la-evento.com/xelasblog/archives/75-Mailbenachrichtigung-bei-verfuegbaren-Nextcloud-Updates.html
@@ -6,6 +6,12 @@
 ###
 # Full path to version file.
 VERSFILE="{{ nextcloud_installation_dir }}/version.php"
+
+if [[ ! -e "$VERSFILE" ]]; then
+  echo 'UPDATE_AVAILABLE'
+  exit
+fi
+
 # Your php version, replace "." with "x"
 PHP="$(php -v | grep "^PHP" | grep -Eo "[0-9]\.[0-9]\.[0-9]{1,2}")"
 PHP="${PHP//./x}"
