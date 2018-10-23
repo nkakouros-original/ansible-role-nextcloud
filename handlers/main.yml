@@ -25,4 +25,3 @@
     state: directory
     recurse: yes
   listen: set app files permissions
-
