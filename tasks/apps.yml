@@ -148,4 +148,3 @@
     chdir: "{{ nextcloud_installation_dir }}"
   with_items: "{{ nextcloud_apps }}"
   when: item.name not in nextcloud_installed_apps.enabled
-
