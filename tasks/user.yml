@@ -47,4 +47,3 @@
     OC_PASS: "{{ item.pass }}"
   loop: "{{ nextcloud_users }}"
   become_user: "{{ nextcloud_file_owner }}"
-
