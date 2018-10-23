@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/tterranigma/ansible-role-nextcloud.svg?branch=master)](https://travis-ci.com/tterranigma/ansible-role-nextcloud)
+
 Ansible Role: Nextcloud
 =========
 
