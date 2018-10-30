@@ -154,7 +154,14 @@
                 | flatten
               ).index(item.0.name)
             ]['json']['folders']
-            | selectattr('name', 'equalto', item.1.folder | default([]) | first | default(''))
+            | selectattr(
+              'name',
+              'equalto',
+              item.1.folder
+              | default([])
+              | first
+              | default('')
+            )
             | list
             | last
             | default('__undefined__')
@@ -222,4 +229,4 @@
 #   # changed_when: result is success
 #   loop: "{{ nextcloud_users[0]['app_config']['news']['feeds'] }}"
 #   delegate_to: localhost
-#
+
