@@ -21,12 +21,11 @@ install:
   - pwd
   # Create ansible.cfg with correct roles_path
   - printf '[defaults]\nroles_path=../' >ansible.cfg
-  - which docker
 
 script:
   # Basic role syntax check
   # - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
-  - molecule test
+  - molecule --debug test
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
