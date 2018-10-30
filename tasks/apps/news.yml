@@ -1,0 +1,225 @@
+---
+
+- name: Create api url
+  set_fact:
+    _nextcloud_api_url_news: "{{ nextcloud_urls[0] }}/apps/news/api/v1-2"
+  when: nextcloud_enable_pretty_urls
+
+- name: Create api url
+  set_fact:
+    # TODO find the url without pretty urls
+    _nextcloud_api_url_news: "{{ _nextcloud_api_url_news }}"
+  when: not nextcloud_enable_pretty_urls
+
+- name: Find users that have News enabled
+  set_fact:
+    _nextcloud_news_users: >-
+      {{
+        nextcloud_users
+        | selectattr('app_config', 'defined')
+        | selectattr('app_config.news', 'defined')
+        | list
+      }}
+
+- name: Merge feeds from opml files
+  set_fact:
+    _nextcloud_news_users: >-
+      [
+        {%- for user in _nextcloud_news_users -%}
+          {%- if 'opml_file' in user.app_config.news -%}
+            {%- set ns = namespace(result=[]) -%}
+            {%- for opml_feed in
+                  user['app_config']['news']['opml_file']
+                  | opml
+            -%}
+              {%- set feed =
+                    user.app_config.news.feeds
+                    | selectattr('url', 'equalto', opml_feed.url)
+                    | list
+              -%}
+              {%- if feed | length == 0 -%}
+                {%- set ns.result = ns.result | union([opml_feed]) -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {{
+              user
+              | combine({
+                  "app_config": {
+                    "news": {
+                      "feeds":
+                        ns.result
+                        | union(user.app_config.news.feeds)
+                    }
+                  }
+                }
+              )
+            }},
+          {%- else -%}
+            {{ user }},
+          {%- endif -%}
+        {%- endfor -%}
+      ]
+
+
+- name: Read existing folders
+  uri:
+    method: GET
+    url: "{{ _nextcloud_api_url_news }}/folders"
+    headers:
+      Authorization: Basic {{ (item.name + ':' + item.pass) | b64encode }}
+  register: _nextcloud_existing_folders
+  loop: "{{ _nextcloud_news_users }}"
+  delegate_to: localhost
+
+- name: Read existing feeds
+  uri:
+    method: GET
+    url: "{{ _nextcloud_api_url_news }}/feeds"
+    headers:
+      Authorization: Basic {{ (item.name + ':' + item.pass) | b64encode }}
+  register: _nextcloud_existing_feeds
+  loop: "{{ _nextcloud_news_users }}"
+  delegate_to: localhost
+
+- name: Create feed folders
+  uri:
+    method: POST
+    url: "{{ _nextcloud_api_url_news }}/folders"
+    body_format: json
+    body:
+      name: "{{ item.1 }}"
+    headers:
+      Authorization: Basic {{ (item.0.name + ':' + item.0.pass) | b64encode }}
+  when: >-
+      _nextcloud_existing_folders.results[
+        (
+          _nextcloud_news_users
+          | map(attribute='name')
+          | flatten
+        ).index(item.0.name)
+      ]['json']['folders']
+      | selectattr('name', 'equalto', item.1)
+      | list
+      | length == 0
+  register: result
+  changed_when: result is success
+  loop: >-
+    {{
+      _nextcloud_news_users
+      | zip(
+        _nextcloud_news_users
+        | subelements('app_config.news.feeds')
+        | map('last')
+        | flatten
+        | selectattr('folder', 'defined')
+        | selectattr('folder', 'ne', [])
+        | map(attribute='folder')
+        | flatten
+        | unique
+      )
+      | list
+    }}
+  delegate_to: localhost
+
+- name: Read folders again
+  uri:
+    method: GET
+    url: "{{ _nextcloud_api_url_news }}/folders"
+    headers:
+      Authorization: Basic {{ (item.name + ':' + item.pass) | b64encode }}
+  when: result is changed
+  register: _nextcloud_existing_folders_again
+  changed_when: _nextcloud_existing_folders_again is success
+  loop: "{{ _nextcloud_news_users }}"
+  delegate_to: localhost
+
+- set_fact:
+    _nextcloud_existing_folders: "{{ _nextcloud_existing_folders_again }}"
+  when: _nextcloud_existing_folders_again is changed
+
+- name: Create feeds
+  uri:
+    method: POST
+    url: "{{ _nextcloud_api_url_news }}/feeds"
+    body_format: json
+    body:
+      url: "{{ item.1.url }}"
+      folderId: >-
+        {{
+          (
+            _nextcloud_existing_folders.results[
+              (
+                _nextcloud_news_users
+                | map(attribute='name')
+                | flatten
+              ).index(item.0.name)
+            ]['json']['folders']
+            | selectattr('name', 'equalto', item.1.folder | default([]) | first | default(''))
+            | list
+            | last
+            | default('__undefined__')
+          )['id']
+          | default(omit)
+        }}
+    headers:
+      Authorization: Basic {{ (item.0.name + ':' + item.0.pass) | b64encode }}
+  when: >-
+    _nextcloud_existing_feeds.results[
+      (
+        _nextcloud_news_users
+        | map(attribute='name')
+        | flatten
+      ).index(item.0.name)
+    ]['json']['feeds']
+    | selectattr('url', 'equalto', item.1.url)
+    | list
+    | length == 0
+  register: result
+  changed_when: result is success
+  loop: "{{ _nextcloud_news_users | subelements('app_config.news.feeds') }}"
+  delegate_to: localhost
+
+# TODO: does not work, says method not allowed
+# - name: Update feeds
+#   uri:
+#     method: PATCH
+#     url: >-
+#       {{
+#         nextcloud_urls[0]
+#       }}/apps/news/api/v1-2/feeds/{{
+#         (
+#           _nextcloud_existing_feeds.json.feeds
+#           | selectattr('url', 'equalto', item.url)
+#           | list
+#           | last
+#         )['id']
+#       }}
+#     body_format: json
+#     body:
+#       url: "{{ item.url }}"
+#       folderId: >-
+#         {{
+#           (
+#             _nextcloud_existing_folders.json.folders
+#             | selectattr('name', 'equalto', 'kde')
+#             | list
+#             | first
+#           )['id']
+#         }}
+#     headers:
+#       Authorization: Basic {{ (item.name + ':' + item.pass) | b64encode }}
+#   when: >-
+#     _nextcloud_existing_feeds.json.feeds
+#     | selectattr('url', 'equalto', item.url)
+#     | list
+#     | last
+#     | attr('folder')
+#     | default('__not_defined__')
+#     !=
+#     item.folder
+#     | default('__not_defined__')
+#   register: result
+#   # changed_when: result is success
+#   loop: "{{ nextcloud_users[0]['app_config']['news']['feeds'] }}"
+#   delegate_to: localhost
+#

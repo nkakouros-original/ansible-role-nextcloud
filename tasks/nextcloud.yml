@@ -19,3 +19,5 @@
 - include_tasks: group.yml
 
 - include_tasks: user_config.yml
+
+- include_tasks: apps/news.yml
