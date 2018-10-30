@@ -7,6 +7,7 @@
     - lineinfile:
         path: "{{ nextcloud_installation_dir }}/config/config.php"
         regexp: "'overwrite\\.cli\\.url' => '[^\\s]*',"
+        # yamllint disable rule:line-length
         line: "  'overwrite.cli.url' => '{{ nextcloud_urls[0] | regex_replace(':[0-9]{2,5}', '') }}/',"
         validate: "/usr/bin/php -l %s"
       notify: "nextcloud update htaccess"
@@ -28,7 +29,13 @@
 - name: Enable Pretty Urls
   lineinfile:
     path: "{{ nextcloud_installation_dir }}/config/config.php"
-    line: "  'htaccess.RewriteBase' => '/{{ nextcloud_urls[0] | regex_replace('/$', '') | urlsplit('path') | regex_replace('^/') }}',"
+    line: >-
+      "  'htaccess.RewriteBase' => '/{{
+        nextcloud_urls[0]
+        | regex_replace('/$', '')
+        | urlsplit('path')
+        | regex_replace('^/')
+      }}',"
     insertbefore: '\);'
     validate: "/usr/bin/php -l %s"
   notify: "nextcloud update htaccess"

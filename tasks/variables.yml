@@ -9,7 +9,8 @@
 
 - name: Set missing defaults
   set_fact:
-    nextcloud_database: "{{ _nextcloud_database | combine(nextcloud_database) }}"
+    nextcloud_database:
+      "{{ _nextcloud_database | combine(nextcloud_database) }}"
 
 - name: Extract download file type
   set_fact:
@@ -22,4 +23,5 @@
 
 - name: Read installation parent dir
   set_fact:
-    nextcloud_installation_parent_dir: "{{ nextcloud_installation_dir | dirname }}"
+    nextcloud_installation_parent_dir:
+      "{{ nextcloud_installation_dir | dirname }}"

@@ -2,16 +2,20 @@
 
 - name: Update .htaccess
   block:
-    - file:
+    - name: Make .htaccess writable
+      file:
         path: "{{ nextcloud_installation_dir }}/.htaccess"
         mode: g+w
       listen: nextcloud update htaccess
-    - command: php occ maintenance:update:htaccess --no-interaction
+    - name: Update .htaccess file
+      command: php occ maintenance:update:htaccess --no-interaction
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       listen: nextcloud update htaccess
+      become: true
       become_user: "{{ nextcloud_file_owner }}"
-    - file:
+    - name: Make .htaccess unwritable again
+      file:
         path: "{{ nextcloud_installation_dir }}/.htaccess"
         mode: g-w
       listen: nextcloud update htaccess
@@ -23,5 +27,6 @@
     owner: "{{ nextcloud_file_owner }}"
     group: "{{ nextcloud_file_owner }}"
     state: directory
-    recurse: yes
+    recurse: true
   listen: set app files permissions
+

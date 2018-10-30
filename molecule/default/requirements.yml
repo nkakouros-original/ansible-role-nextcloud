@@ -1,0 +1,7 @@
+---
+
+- src: geerlingguy.php
+- src: geerlingguy.mysql
+- src: geerlingguy.apache
+- src: geerlingguy.firewall
+- src: manala.cron

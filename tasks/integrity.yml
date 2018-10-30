@@ -6,6 +6,7 @@
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       register: nextcloud_integrity_core
+      become: true
       become_user: "{{ nextcloud_file_owner }}"
       failed_when: false
       changed_when: false
@@ -23,6 +24,7 @@
         }}
       changed_when: false
       failed_when: false
+      become: true
       become_user: "{{ nextcloud_file_owner }}"
     - set_fact:
         nextcloud_extra_files: >-
@@ -32,14 +34,21 @@
               {%- set files=(result.stdout_lines[-1] | from_json) -%}
               {%- if files is mapping and 'EXTRA_FILE' in files -%}
                 "{{ []
-                  | zip_longest(files['EXTRA_FILE'].keys(), fillvalue=("apps/" ~ appname))
+                  | zip_longest(
+                    files['EXTRA_FILE'].keys(),
+                    fillvalue=("apps/" ~ appname)
+                  )
                   | map('join', '/')
                   | list
                   | join('","') }}"
                   ,
               {%- endif -%}
             {%- endfor -%}
-            {%- set files=(nextcloud_integrity_core.stdout_lines[-1] | from_json ) -%}
+            {%- set files=(
+                  nextcloud_integrity_core.stdout_lines[-1]
+                  | from_json
+                )
+            -%}
             {%- if files is mapping and 'EXTRA_FILE' in files -%}
               '{{ files["EXTRA_FILE"].keys() | join("','") }}'
             {%- endif -%}
@@ -52,4 +61,3 @@
     chdir: "{{ nextcloud_installation_dir }}"
   when: nextcloud_extra_files | length > 0
 
-# TODO rescan after cleanup as in the status page removed files are still listed.

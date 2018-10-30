@@ -13,7 +13,11 @@
 - name: Remove non-json text from command output
   set_fact:
     nextcloud_shipped_apps: >-
-      {{ nextcloud_shipped_apps.stdout[(nextcloud_shipped_apps.stdout.find('{')):] }}
+      {{
+        nextcloud_shipped_apps.stdout[
+          (nextcloud_shipped_apps.stdout.find('{')):
+        ]
+      }}
 
 - name: Read all installed apps
   command: php occ app:list --output=json
@@ -26,120 +30,137 @@
 - name: Remove non-json text from command output
   set_fact:
     nextcloud_installed_apps: >-
-      {{ nextcloud_installed_apps.stdout[(nextcloud_installed_apps.stdout.find('{')):] }}
+      {{
+        nextcloud_installed_apps.stdout[
+          (nextcloud_installed_apps.stdout.find('{')):
+        ]
+      }}
 
 - name: Installing external apps
   block:
-  - name: Find full nextcloud version
-    command: php occ -V
-    args:
-      chdir: "{{ nextcloud_installation_dir }}"
-    become_user: "{{ nextcloud_file_owner }}"
-    register: nextcloud_full_version
-    changed_when: false
+    - name: Find full nextcloud version
+      command: php occ -V
+      args:
+        chdir: "{{ nextcloud_installation_dir }}"
+      become_user: "{{ nextcloud_file_owner }}"
+      register: nextcloud_full_version
+      changed_when: false
 
-  - name: Create app json file url
-    set_fact:
-      nextcloud_app_store_json_url: >-
-        https://apps.nextcloud.com/api/v1/platform/{{
-          nextcloud_full_version.stdout_lines[-1]
-          | regex_replace('Nextcloud \b\w*\b ?([0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}) ?.*', '\1')
-        }}/apps.json
-    changed_when: false
+    - name: Create app json file url
+      set_fact:
+        nextcloud_app_store_json_url: >-
+          https://apps.nextcloud.com/api/v1/platform/{{
+            nextcloud_full_version.stdout_lines[-1]
+            | regex_replace(
+                'Nextcloud \b\w*\b ?([0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}) ?.*',
+                '\1'
+              )
+          }}/apps.json
+      changed_when: false
 
-  - name: Download the app json file
-    get_url:
-      url: "{{ nextcloud_app_store_json_url }}"
-      dest: /tmp
-    register: result
-    until: result is success
+    - name: Download the app json file
+      get_url:
+        url: "{{ nextcloud_app_store_json_url }}"
+        dest: /tmp
+      register: result
+      until: result is success
 
-  - name: Read the app json file
-    command: cat /tmp/apps.json
-    register: nextcloud_app_store_json
-    changed_when: false
+    - name: Read the app json file
+      command: cat /tmp/apps.json
+      register: nextcloud_app_store_json
+      changed_when: false
 
-  - name: Parse the app json file
-    set_fact:
-      nextcloud_app_store_json: "{{ nextcloud_app_store_json.stdout | from_json }}"
-    changed_when: false
+    - name: Parse the app json file
+      set_fact:
+        nextcloud_app_store_json:
+          "{{ nextcloud_app_store_json.stdout | from_json }}"
+      changed_when: false
 
-  - name: Download apps
-    unarchive:
-      src: >-
-        {%- set tmp=(
-          nextcloud_app_store_json
-          | selectattr('id', 'equalto', item.name)
-          | map(attribute='releases')
-          | first
-          | list
-          ) -%}
-        {% if 'version' in item %}
-          {% set tmp=(tmp | selectattr('version', 'equalto', item.version) | list) %}
-        {% endif %}
-        {{ (tmp | first).download }}
-      dest: "{{ nextcloud_installation_dir }}/apps"
-      remote_src: yes
-      mode: u=rwX,g=rX,o=rX
-    with_items: "{{ nextcloud_apps }}"
-    notify:
-      - set app files permissions
-    when: >-
-      {#- There are three checks here: -#}
-      {#- 1. The specified app does not exist in the nextcloud installation -#}
-      (
-        item.name not in
-          nextcloud_shipped_apps.enabled
-          | combine(nextcloud_shipped_apps.disabled)
-          | combine(nextcloud_shipped_apps.enabled)
-          | combine(nextcloud_shipped_apps.disabled)
-      )
-      or
-      {#- 2. The specified version for an app is different to the one installed -#}
-      (
-        item.name in
-          nextcloud_installed_apps.enabled | combine(nextcloud_installed_apps.disabled)
-        and
-        'version' in item
-        and
-        item.version | default('unset') !=
-          (nextcloud_installed_apps.enabled | combine(nextcloud_installed_apps.disabled))[item.name]
-      )
-      or
-      {#- 3. The app was specified without a version, meaning the latest version available
-             should be downloaded. So, the version from the appstore is checked against
-             the locac version -#}
-      (
+    - name: Download apps
+      unarchive:
+        src: >-
+          {%- set tmp=(
+            nextcloud_app_store_json
+            | selectattr('id', 'equalto', item.name)
+            | map(attribute='releases')
+            | first
+            | list
+            ) -%}
+          {% if 'version' in item %}
+          {% set tmp=(
+              tmp
+              | selectattr('version', 'equalto', item.version)
+              | list)
+          %}
+          {% endif %}
+          {{ (tmp | first).download }}
+        dest: "{{ nextcloud_installation_dir }}/apps"
+        remote_src: true
+        mode: u=rwX,g=rX,o=rX
+      with_items: "{{ nextcloud_apps }}"
+      notify:
+        - set app files permissions
+      when: >-
+        {#- There are three checks here: -#}
+        {#- 1. The app does not exist in the nextcloud installation -#}
         (
-          nextcloud_app_store_json
-          | selectattr('id', 'equalto', item.name)
-          | map(attribute='releases')
-          | first
-          | list
-        )[0].version
-        !=
+          item.name not in
+            nextcloud_shipped_apps.enabled
+            | combine(nextcloud_shipped_apps.disabled)
+            | combine(nextcloud_shipped_apps.enabled)
+            | combine(nextcloud_shipped_apps.disabled)
+        )
+        or
+        {#- 2. The version for an app is different to the one installed -#}
         (
-          (
+          item.name in
             nextcloud_installed_apps.enabled
             | combine(nextcloud_installed_apps.disabled)
-          ) [item.name]
+          and
+          'version' in item
+          and
+          item.version | default('unset') !=
+            (
+              nextcloud_installed_apps.enabled
+              | combine(nextcloud_installed_apps.disabled)
+            )[item.name]
         )
-      )
+        or
+        {#- 3. The app was specified without a version, meaning the latest
+               version available should be downloaded. So, the version from the
+               appstore is checked against the locac version -#}
+        (
+          (
+            nextcloud_app_store_json
+            | selectattr('id', 'equalto', item.name)
+            | map(attribute='releases')
+            | first
+            | list
+          )[0].version
+          !=
+          (
+            (
+              nextcloud_installed_apps.enabled
+              | combine(nextcloud_installed_apps.disabled)
+            ) [item.name]
+          )
+        )
 
   # Is this really useful? If occ supports app:update, then it makes sense
-  #- name: Install external apps
-  #  command: php occ app:install "{{ item.name }}"
-  #  with_items: "{{ nextcloud_apps }}"
-  #  become_user: "{{ nextcloud_file_owner }}"
-  #  args:
-  #    chdir: "{{ nextcloud_installation_dir }}"
-  #  register: result
-  #  failed_when: not (result.stdout | search('already installed') or result.rc == 0)
-  #  changed_when: result.rc == 0
-  #  when: >-
-  #    nextcloud_version >= 13 and
-  #    item.name not in (nextcloud_installed_apps.enabled
-  #      | combine(nextcloud_installed_apps.disabled))
+  # - name: Install external apps
+  #   command: php occ app:install "{{ item.name }}"
+  #   with_items: "{{ nextcloud_apps }}"
+  #   become_user: "{{ nextcloud_file_owner }}"
+  #   args:
+  #     chdir: "{{ nextcloud_installation_dir }}"
+  #   register: result
+  #   failed_when: not (result.stdout
+  #     | search('already installed') or result.rc == 0)
+  #   changed_when: result.rc == 0
+  #   when: >-
+  #     nextcloud_version >= 13 and
+  #     item.name not in (nextcloud_installed_apps.enabled
+  #       | combine(nextcloud_installed_apps.disabled))
 
 - name: Enable apps
   command: php occ app:enable "{{ item.name }}"

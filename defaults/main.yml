@@ -1,6 +1,6 @@
 ---
 
-nextcloud_enable: yes
+nextcloud_enable: true
 # Set this to 'no' to completely disable the role
 
 nextcloud_version: 13
@@ -10,12 +10,14 @@ nextcloud_version: 13
 # correctly install the apps.
 
 # TODO This is useless as `nextcloud_version` is required
+# yamllint disable rule:line-length
 nextcloud_download_url: >-
   {%- if nextcloud_version != '' -%}
     https://download.nextcloud.com/server/releases/latest-{{ nextcloud_version }}.zip
   {%- else -%}
     https://download.nextcloud.com/server/releases/latest.zip
   {%- endif -%}
+# yamllint enable rule:line-length
 
 # The url to download nextcloud from. Currently only the latest stable version
 # is supported.
@@ -58,7 +60,7 @@ nextcloud_admin_pass: ''
 # The password of the admin user. This variable should not be empty.
 
 # TODO make this part of nextcloud_config_system
-nextcloud_enable_pretty_urls: yes
+nextcloud_enable_pretty_urls: true
 # Set to yes to enable urls of the form https://example.org/calendar replacing
 # https://example.org/nextcloud/index.php/s/Sv1b7krAUqmF8QQ.
 
@@ -89,15 +91,17 @@ nextcloud_users: []
 # nextcloud_users:
 #   - name: alice
 #     pass: superstrongnot
-#     resetpassword: yes  # to reset the passsword every time the playbook is run
+#     resetpassword: yes  # reset the passsword every time the playbook is run
 #     display_name: Alice B. Charlie
 #     settings:
 #       - firstrunwizard:
 #           show: 0
 #       - calendar:
 #           showWeekNr: 'yes'
+#     app_config:
+#       ...
 #
-# App and core configuration happens per user. To find out what config options are
-# available, either make the changes manually and then the oc_preferences table
-# in your nextcloud database or use the `occ config:list` command on your server
-# to get a listing of the current configuration options.
+# App and core configuration happens per user. To find out what config options
+# are available, either make the changes manually and then the oc_preferences
+# table in your nextcloud database or use the `occ config:list` command on your
+# server to get a listing of the current configuration options.

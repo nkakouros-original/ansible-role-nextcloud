@@ -1,0 +1,61 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  vars:
+    mysql_databases:
+      - name: nextcloud
+    mysql_users:
+      - name: nextcloud
+        password: password
+        priv: "nextcloud.*:ALL"
+    apache_vhosts:
+      - servername: cloud.kakouros.net
+        documentroot: /var/www/html/nextcloud
+        extra_parameters: |
+          SetEnv HOME /var/www/html/nextcloud
+          SetEnv HTTP_HOME /var/www/html/nextcloud
+    nextcloud_database:
+      name: "{{ mysql_databases[0].name }}"
+      user: "{{ mysql_users[0].name }}"
+      pass: "{{ mysql_users[0].password }}"
+    nextcloud_admin_user: admin
+    nextcloud_admin_pass: password
+    nextcloud_urls_tmp: >-
+      {{ apache_vhosts
+        | map(attribute='servername')
+        | list
+        | zip_longest([], fillvalue=':80')
+        | map('join')
+        | list }}
+    nextcloud_urls: >-
+      {{ []
+        | zip_longest(nextcloud_urls_tmp, fillvalue='http://')
+        | map('join')
+        | list}}
+    nextcloud_apps:
+      - name: calendar
+      - name: tasks
+      - name: news
+    nextcloud_version: 14
+    nextcloud_config_global:
+      backgroundjobs_mode: cron
+    nextcloud_users:
+      - name: demo
+        pass: password
+        groups:
+          - admin
+        resetpassword: true
+        display_name: Nikolaos Kakouros
+        settings:
+          - firstrunwizard:
+              show: 0
+          - calendar:
+              showWeekNr: true
+  pre_tasks:
+    - name: Gather facts
+      setup: null
+      become: false
+  tasks:
+    - include_role:
+        name: ansible-role-nextcloud

@@ -16,7 +16,7 @@
     - template:
         src: check_updates.sh.j2
         dest: /tmp/check_updates.sh
-        mode: 0700
+        mode: 0o700
       changed_when: false
     - command: /tmp/check_updates.sh
       register: update_status
@@ -26,7 +26,7 @@
   unarchive:
     src: "{{ nextcloud_download_url }}"
     dest: "{{ nextcloud_installation_parent_dir }}"
-    remote_src: yes
+    remote_src: true
     owner: "{{ nextcloud_file_owner }}"
     group: "{{ nextcloud_file_owner }}"
   when: update_status.stdout == "UPDATE_AVAILABLE"
@@ -35,7 +35,10 @@
 # a nextcloud folder. Here, we rename this folder if the user has specified a
 # different folder.
 - name: Move nextcloud folder
-  command: mv "{{ nextcloud_installation_parent_dir }}/nextcloud" "{{ nextcloud_installation_dir }}"
+  command: >-
+    mv
+    "{{ nextcloud_installation_parent_dir }}/nextcloud"
+    "{{ nextcloud_installation_dir }}"
   when:
     - update_status.stdout == "UPDATE_AVAILABLE"
     - nextcloud_installation_dir | basename != "nextcloud"
@@ -69,27 +72,29 @@
         group: "{{ nextcloud_file_owner }}"
         mode: "u=rwX,g=rX,o-rwx"
         state: directory
-        recurse: yes
-      loop: "{{ nextcloud_installation_files.files | selectattr('isdir') | list }}"
+        recurse: true
+      loop:
+        "{{ nextcloud_installation_files.files | selectattr('isdir') | list }}"
     # For files, we are using `shell` as `file` with a loop would take ages to
     # complete.
     - shell: >-
         find "{{ nextcloud_installation_dir }}" \
           -type f \
           ! -name '.htaccess' \
-          -exec chown {{ nextcloud_file_owner }}:{{ nextcloud_file_owner }} {} \;
-      changed_when: no
+          -exec \
+            chown {{ nextcloud_file_owner }}:{{ nextcloud_file_owner }} {} \;
+      changed_when: false
     - shell: >-
         find "{{ nextcloud_installation_dir }}" \
           -type f \
           ! -name '.htaccess' \
           -exec chmod 0640 {} \;
-      changed_when: no
+      changed_when: false
     - file:
         path: "{{ nextcloud_installation_dir }}"
         owner: root
         group: "{{ nextcloud_file_owner }}"
-        mode: 0750
+        mode: 0o750
         state: directory
     - file:
         path: "{{ nextcloud_installation_dir }}/occ"
@@ -98,4 +103,4 @@
         path: "{{ nextcloud_installation_dir }}/.htaccess"
         owner: root
         group: "{{ nextcloud_file_owner }}"
-        mode: 0644
+        mode: 0o644

@@ -5,14 +5,16 @@
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   register: _nextcloud_old_preferences
-  changed_when: no
+  changed_when: false
   become_user: "{{ nextcloud_file_owner }}"
 
 - set_fact:
-    _nextcloud_old_preferences: "{{ _nextcloud_old_preferences.stdout | from_json }}"
+    _nextcloud_old_preferences:
+      "{{ _nextcloud_old_preferences.stdout | from_json }}"
 
 - name: Set up global preferences
-  command: php occ config:app:set core "{{ item.key }}" --value "{{ item.value }}"
+  command:
+    php occ config:app:set core "{{ item.key }}" --value "{{ item.value }}"
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   when: >-

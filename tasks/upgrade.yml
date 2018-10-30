@@ -5,7 +5,7 @@
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   register: nextcloud_status
-  changed_when: no
+  changed_when: false
   become_user: "{{ nextcloud_file_owner }}"
 
 - name: Upgrade Nextcloud installation
