@@ -38,11 +38,13 @@
       - name: tasks
       - name: news
     nextcloud_version: 14
-    nextcloud_config_global:
-      backgroundjobs_mode: cron
+    nextcloud_config:
+      apps:
+        core:
+          backgroundjobs_mode: cron
     nextcloud_users:
       - name: demo
-        pass: password
+        pass: 'tE(DVOsdo24)$@#f9S'
         groups:
           - admin
         resetpassword: true

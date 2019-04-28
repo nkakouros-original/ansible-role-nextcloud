@@ -15,23 +15,17 @@
       - mariadb-client
       - mariadb-server
       - python-mysqldb
+    php_default_version_debian: '7.3'
     php_packages_extra:
-      - libapache2-mod-php7.0
-      - php-zip
-      - php-imap
-      - php-gd
-      - php-json
-      - php-xml
-      - php-mbstring
-      - php-mysql
-      - php-curl
-      - php-bz2
-      - php-intl
+      - "libapache2-mod-php{{ php_default_version_debian }}"
+      - "php{{ php_default_version_debian }}-zip"
+      - "php{{ php_default_version_debian }}-mysql"
+      - "php{{ php_default_version_debian }}-bz2"
+      - "php{{ php_default_version_debian }}-intl"
+      - "php{{ php_default_version_debian }}-gmp"
+      - "php{{ php_default_version_debian }}-apcu"
+      - "php{{ php_default_version_debian }}-imagick"
       - php-mcrypt
-      - php-gmp
-      - php-apcu
-      - php-imagick
-      - php-curl
     apache_remove_default_vhost: true
     apache_vhosts:
       - servername: cloud.kakouros.net
@@ -41,7 +35,7 @@
           SetEnv HTTP_HOME /var/www/html/nextcloud
     apache_mods_enabled:
       - rewrite.load
-      - php7.0.load
+      - "php{{ php_default_version_debian }}.load"
       - headers.load
       - env.load
       - dir.load
@@ -59,6 +53,8 @@
       setup: null
       become: false
   tasks:
+    - include_role:
+        name: iambryancs.ppa-ondrej
     - include_role:
         name: geerlingguy.php
     - include_role:
