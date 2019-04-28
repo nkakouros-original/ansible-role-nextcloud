@@ -60,10 +60,10 @@
       become: false
   tasks:
     - include_role:
-        name: ansible-role-php
+        name: geerlingguy.php
     - include_role:
-        name: ansible-role-mysql
+        name: geerlingguy.apache
     - include_role:
-        name: ansible-role-apache
+        name: geerlingguy.mysql
     - include_role:
-        name: ansible-role-cron
+        name: geerlingguy.cron
