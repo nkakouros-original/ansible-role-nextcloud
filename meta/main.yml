@@ -1,6 +1,7 @@
 ---
 
 galaxy_info:
+  role_name: nextcloud
   author: Nikolaos Kakouros
   description:
     Featureful, unbloated Nextcloud Server role without php/DB/webserver/etc
