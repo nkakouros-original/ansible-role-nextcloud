@@ -24,7 +24,7 @@ install:
   - printf '[defaults]\nroles_path=../' >ansible.cfg
 
 script:
-  - molecule --debug test
+  - molecule test
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
