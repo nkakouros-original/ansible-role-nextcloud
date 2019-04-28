@@ -133,7 +133,8 @@
   loop: "{{ _nextcloud_news_users }}"
   delegate_to: localhost
 
-- set_fact:
+- name: Update folders variable
+  set_fact:
     _nextcloud_existing_folders: "{{ _nextcloud_existing_folders_again }}"
   when: _nextcloud_existing_folders_again is changed
 

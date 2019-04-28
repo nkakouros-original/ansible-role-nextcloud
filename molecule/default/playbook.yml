@@ -32,7 +32,7 @@
       {{ []
         | zip_longest(nextcloud_urls_tmp, fillvalue='http://')
         | map('join')
-        | list}}
+        | list }}
     nextcloud_apps:
       - name: calendar
       - name: tasks

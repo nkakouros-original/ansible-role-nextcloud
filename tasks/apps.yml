@@ -44,6 +44,7 @@
       command: php occ -V
       args:
         chdir: "{{ nextcloud_installation_dir }}"
+      become: true
       become_user: "{{ nextcloud_file_owner }}"
       register: nextcloud_full_version
       changed_when: false

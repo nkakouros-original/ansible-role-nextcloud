@@ -9,7 +9,8 @@
   become: true
   become_user: "{{ nextcloud_file_owner }}"
 
-- set_fact:
+- name: Parse global preferences as json
+  set_fact:
     _nextcloud_old_preferences:
       "{{ _nextcloud_old_preferences.stdout | from_json }}"
 
@@ -28,6 +29,8 @@
     chdir: "{{ nextcloud_installation_dir }}"
   become: true
   become_user: "{{ nextcloud_file_owner }}"
+  register: result
+  changed_when: result is success
   notify: nextcloud update htaccess
 
 - meta: flush_handlers

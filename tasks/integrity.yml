@@ -2,15 +2,18 @@
 
 - name: Read extra files
   block:
-    - command: "php occ integrity:check-core --output=json"
+    - name: Run integrity check for core
+      command: "php occ integrity:check-core --output=json"
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       register: nextcloud_integrity_core
+      become: true
       become_user: "{{ nextcloud_file_owner }}"
       failed_when: false
       changed_when: false
 
-    - command: "php occ integrity:check-app {{ item }} --output=json"
+    - name: Run integrity check for apps
+      command: "php occ integrity:check-app {{ item }} --output=json"
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       register: nextcloud_integrity_apps
@@ -24,9 +27,11 @@
         }}
       changed_when: false
       failed_when: false
+      become: true
       become_user: "{{ nextcloud_file_owner }}"
 
-    - set_fact:
+    - name: Extract extra files that need deletion
+      set_fact:
         nextcloud_extra_files: >-
           [
             {%- for result in nextcloud_integrity_apps.results -%}

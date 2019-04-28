@@ -10,16 +10,17 @@
   package:
     name: imagemagick
 
+- name: Upload script to check for updates
+  template:
+    src: check_updates.sh.j2
+    dest: /tmp/check_updates.sh
+    mode: 0o700
+  changed_when: false
+
 - name: Check if update is available
-  block:
-    - template:
-        src: check_updates.sh.j2
-        dest: /tmp/check_updates.sh
-        mode: 0o700
-      changed_when: false
-    - command: /tmp/check_updates.sh
-      register: update_status
-      changed_when: false
+  command: /tmp/check_updates.sh
+  register: update_status
+  changed_when: false
 
 - name: Download nextcloud
   unarchive:

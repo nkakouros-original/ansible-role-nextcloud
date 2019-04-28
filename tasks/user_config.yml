@@ -1,18 +1,19 @@
 ---
 
 - name: Get local python version
-  block:
-    - command: python -V
-      delegate_to: localhost
-      register: localhost_python
-      changed_when: false
-    - set_fact:
-        localhost_python: >-
-          {{
-            localhost_python.stdout
-            | regex_replace('^Python ([0-9])\\..*$', '\\1')
-          }}
-      changed_when: false
+  command: python -V
+  delegate_to: localhost
+  register: localhost_python
+  changed_when: false
+
+- name: Register local python version
+  set_fact:
+    localhost_python: >-
+      {{
+        localhost_python.stdout
+        | regex_replace('^Python ([0-9])\\..*$', '\\1')
+      }}
+  changed_when: false
 
 # TODO simplify this with filters
 - name: Create user settings list
