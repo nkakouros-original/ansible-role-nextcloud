@@ -6,13 +6,15 @@
     chdir: "{{ nextcloud_installation_dir }}"
   register: nextcloud_status
   changed_when: false
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
 
 - name: Upgrade Nextcloud installation
   command: php occ upgrade
   args:
     chdir: "{{ nextcloud_installation_dir }}"
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
   when: >-
     nextcloud_status.stdout
-      | search('Nextcloud or one of the apps require upgrade')
+      is search('Nextcloud or one of the apps require upgrade')

@@ -4,9 +4,7 @@
 
 - include_tasks: install.yml
 
-- include_tasks: setup.yml
-
-- import_tasks: apps.yml
+- include_tasks: apps.yml
 
 - include_tasks: integrity.yml
 

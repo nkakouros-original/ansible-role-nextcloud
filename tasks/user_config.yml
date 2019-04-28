@@ -74,4 +74,3 @@
   with_together:
     - "{{ user_settings }}"
     - "{{ user_config_values.results }}"
-

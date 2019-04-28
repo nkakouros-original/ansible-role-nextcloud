@@ -16,6 +16,7 @@
   changed_when: result is success
   failed_when:
     result is failed and result.stdout is not search('already exists')
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
 
 - name: Get user info
@@ -25,23 +26,8 @@
   register: _nextcloud_user_info
   loop: "{{ nextcloud_users }}"
   changed_when: false
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
-
-- debug:
-    msg: >-
-      {{
-        (
-        _nextcloud_user_info.results
-        | map(attribute='stdout')
-        | map('from_json')
-        | selectattr(
-          'user_id',
-          'equalto',
-          (nextcloud_users | subelements('groups'))[0][0]['name']
-        )
-        | first
-        )
-      }}
 
 - name: Add users to groups
   command: php occ group:adduser "{{ item.1 }}" "{{ item.0.name }}"
@@ -57,5 +43,5 @@
       | selectattr('user_id', 'equalto', item.0.name)
       | first
     ).groups
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
-

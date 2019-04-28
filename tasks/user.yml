@@ -6,6 +6,7 @@
     chdir: "{{ nextcloud_installation_dir }}"
   register: nextcloud_online_users
   changed_when: false
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
 
 # There might be non-json lines that break parsing.
@@ -33,6 +34,7 @@
   environment:
     OC_PASS: "{{ item.pass }}"
   loop: "{{ nextcloud_users }}"
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
 
 # TODO this show as changed always
@@ -46,4 +48,5 @@
   environment:
     OC_PASS: "{{ item.pass }}"
   loop: "{{ nextcloud_users }}"
+  become: true
   become_user: "{{ nextcloud_file_owner }}"

@@ -3,8 +3,8 @@
 - name: Checking role configuration
   assert:
     that:
-      - nextcloud_database.pass != ""
-      - nextcloud_admin_pass != ""
+      - nextcloud_database.pass
+      - ( nextcloud_admin_pass )
     msg: "DB user and admin user passwords cannot be empty"
 
 - name: Set missing defaults

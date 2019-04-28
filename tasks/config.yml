@@ -6,20 +6,34 @@
     chdir: "{{ nextcloud_installation_dir }}"
   register: _nextcloud_old_preferences
   changed_when: false
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
 
 - set_fact:
     _nextcloud_old_preferences:
       "{{ _nextcloud_old_preferences.stdout | from_json }}"
 
+- name: Save config to file
+  copy:
+    content: "{{ nextcloud_config | to_json }}"
+    dest: /tmp/nextcloud_config_53ab3c4
+    owner: "{{ nextcloud_file_owner }}"
+    mode: 0o400
+  changed_when: false
+
 - name: Set up global preferences
   command:
-    php occ config:app:set core "{{ item.key }}" --value "{{ item.value }}"
+    php occ config:import /tmp/nextcloud_config_53ab3c4
   args:
     chdir: "{{ nextcloud_installation_dir }}"
-  when: >-
-    _nextcloud_old_preferences.apps.core[item.key]
-      | default('//__UNDEFINED__//')
-    != item.value
-  loop: "{{ nextcloud_config_global | dict2items }}"
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
+  notify: nextcloud update htaccess
+
+- meta: flush_handlers
+
+- name: Delete config file
+  file:
+    path: /tmp/nextcloud_config_53ab3c4
+    state: absent
+  changed_when: false

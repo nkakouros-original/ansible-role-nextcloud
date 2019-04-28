@@ -5,6 +5,7 @@
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   register: nextcloud_shipped_apps
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
   changed_when: false
 
@@ -23,6 +24,7 @@
   command: php occ app:list --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
   register: nextcloud_installed_apps
   changed_when: false
@@ -36,7 +38,7 @@
         ]
       }}
 
-- name: Installing external apps
+- name: Install external apps
   block:
     - name: Find full nextcloud version
       command: php occ -V
@@ -164,8 +166,9 @@
 
 - name: Enable apps
   command: php occ app:enable "{{ item.name }}"
-  become_user: "{{ nextcloud_file_owner }}"
   args:
     chdir: "{{ nextcloud_installation_dir }}"
+  become: true
+  become_user: "{{ nextcloud_file_owner }}"
   with_items: "{{ nextcloud_apps }}"
   when: item.name not in nextcloud_installed_apps.enabled
