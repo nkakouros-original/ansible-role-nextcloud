@@ -66,4 +66,4 @@
     - include_role:
         name: geerlingguy.mysql
     - include_role:
-        name: geerlingguy.cron
+        name: manala.cron
