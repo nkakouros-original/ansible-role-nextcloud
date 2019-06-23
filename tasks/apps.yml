@@ -90,11 +90,11 @@
             | list
             ) -%}
           {% if 'version' in item %}
-          {% set tmp=(
-              tmp
-              | selectattr('version', 'equalto', item.version)
-              | list)
-          %}
+            {% set tmp=(
+                tmp
+                | selectattr('version', 'equalto', item.version)
+                | list)
+            %}
           {% endif %}
           {{ (tmp | first).download }}
         dest: "{{ nextcloud_installation_dir }}/apps"
