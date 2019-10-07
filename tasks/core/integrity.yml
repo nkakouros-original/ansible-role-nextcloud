@@ -61,8 +61,35 @@
 
 # Using `command` instead of `file` with a loop to make it (much) faster.
 - name: Delete extra files
-  command: rm -f "{{ nextcloud_extra_files | join(' ') }}"
+  command: >-
+    rm -f '{{ nextcloud_extra_files | join("' '") }}'
   args:
     chdir: "{{ nextcloud_installation_dir }}"
     warn: false
   when: nextcloud_extra_files | length > 0
+
+- name: Run integrity check again to update integrity results
+  command: "php occ integrity:check-core --output=json"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  become: true
+  become_user: "{{ nextcloud_file_owner }}"
+  failed_when: false
+  changed_when: false
+
+- name: Run again integrity check for apps
+  command: "php occ integrity:check-app {{ item }} --output=json"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  loop: >-
+    {{
+      (
+        nextcloud_installed_apps.enabled
+        | combine(nextcloud_installed_apps.disabled)
+      ).keys()
+      | list
+    }}
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "{{ nextcloud_file_owner }}"

@@ -94,6 +94,7 @@
         find "{{ nextcloud_installation_dir }}"
           -type f
           ! -name '.htaccess'
+          ! -name 'occ'
           -exec chmod 0640 {} \;
       changed_when: false
     - name: Set permissions on installation directory

@@ -2,20 +2,20 @@
 
 - include_tasks: variables.yml
 
-- include_tasks: install.yml
+- include_tasks: core/install.yml
 
-- include_tasks: apps.yml
+- include_tasks: core/apps.yml
 
-- include_tasks: integrity.yml
+- include_tasks: core/integrity.yml
 
-- include_tasks: upgrade.yml
+- include_tasks: core/upgrade.yml
 
-- include_tasks: config.yml
+- include_tasks: core/config.yml
 
-- include_tasks: user.yml
+- include_tasks: users/user.yml
 
-- include_tasks: group.yml
+- include_tasks: users/group.yml
 
-- include_tasks: user_config.yml
+- include_tasks: users/user_config.yml
 
 - include_tasks: apps/news.yml
