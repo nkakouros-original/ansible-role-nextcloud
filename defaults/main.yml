@@ -9,24 +9,22 @@ nextcloud_version: 16
 # next option), 'nextcloud_version' should be set as it is also used to
 # correctly install the apps.
 
-# TODO This is useless as `nextcloud_version` is required
-# yamllint disable rule:line-length
 nextcloud_download_url: >-
-  {%- if nextcloud_version != '' -%}
-    https://download.nextcloud.com/server/releases/latest-{{ nextcloud_version }}.zip
+  {%- if nextcloud_version | length > 0 -%}
+    https://download.nextcloud.com/server/releases/latest-{{
+      nextcloud_version }}.zip
   {%- else -%}
     https://download.nextcloud.com/server/releases/latest.zip
   {%- endif -%}
-# yamllint enable rule:line-length
-
 # The url to download nextcloud from. Currently only the latest stable version
-# is supported.
+# is supported by the role.
 
 nextcloud_installation_dir: '/var/www/html/nextcloud/'
-# Where to extract nextcloud files
+# Where to extract nextcloud files. This is the directory where the web server
+# will load nextcloud from.
 
 nextcloud_data_dir: "{{ nextcloud_installation_dir }}/data"
-# Path to nextcloud user data directory
+# Path to nextcloud user data directory.
 
 nextcloud_file_owner: 'www-data'
 # The user that will own nextcloud files.
@@ -82,7 +80,26 @@ nextcloud_apps: []
 # If 'version' is not given, then the latest version available for the installed
 # nextcloud version will be installed.
 
-nextcloud_config_global: {}
+nextcloud_config: {}
+# A yaml array with settings of nextcloud apps. For instance:
+# ```
+# nextcloud_config:
+#   apps:
+#     core:
+#       backgroundjobs_mode: cron
+#   system:
+#     overwrite:
+#       cli:
+#         url: "{{ nextcloud_urls[0] | regex_replace(':[0-9]{2,5}', '') }}"
+#     trusted_domains: "{{ nextcloud_urls | map('urlsplit', 'hostname') | list }}"
+#     htaccess:
+#       RewriteBase: >-
+#         /{{ nextcloud_urls[0]
+#           | regex_replace('/$', '')
+#           | urlsplit('path')
+#           | regex_replace('^/')
+#         }}
+# ```
 
 nextcloud_users: []
 # The ansible users to create, other than the admin.

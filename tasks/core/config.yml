@@ -9,6 +9,7 @@
   become: true
   become_user: "{{ nextcloud_file_owner }}"
 
+# TODO this is unused
 - name: Parse global preferences as json
   set_fact:
     _nextcloud_old_preferences:
