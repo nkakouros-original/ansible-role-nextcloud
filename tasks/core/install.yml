@@ -43,6 +43,14 @@
     - update_status.stdout == "UPDATE_AVAILABLE"
     - nextcloud_installation_dir | basename != "nextcloud"
 
+- name: Ensure presence of nextcloud data folder
+  file:
+    path: "{{ nextcloud_data_dir }}"
+    state: directory
+    owner: "{{ nextcloud_file_owner }}"
+    group: "{{ nextcloud_file_owner }}"
+    mode: 0o755
+
 - name: Install nextcloud
   command: >-
     php occ maintenance:install --no-interaction
