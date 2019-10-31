@@ -10,7 +10,7 @@ nextcloud_version: 16
 # correctly install the apps.
 
 nextcloud_download_url: >-
-  {%- if nextcloud_version | length > 0 -%}
+  {%- if nextcloud_version > 0 -%}
     https://download.nextcloud.com/server/releases/latest-{{
       nextcloud_version }}.zip
   {%- else -%}
