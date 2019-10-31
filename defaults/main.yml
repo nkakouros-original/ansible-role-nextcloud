@@ -91,7 +91,8 @@ nextcloud_config: {}
 #     overwrite:
 #       cli:
 #         url: "{{ nextcloud_urls[0] | regex_replace(':[0-9]{2,5}', '') }}"
-#     trusted_domains: "{{ nextcloud_urls | map('urlsplit', 'hostname') | list }}"
+#     trusted_domains:
+#       "{{ nextcloud_urls | map('urlsplit', 'hostname') | list }}"
 #     htaccess:
 #       RewriteBase: >-
 #         /{{ nextcloud_urls[0]
