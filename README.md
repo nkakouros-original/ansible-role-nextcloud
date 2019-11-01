@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.com/tterranigma/ansible-role-nextcloud.svg?branch=master)](https://travis-ci.com/tterranigma/ansible-role-nextcloud)
+[![Build Status](https://travis-ci.com/nkakouros-original/ansible-role-nextcloud.svg?branch=master)](https://travis-ci.com/nkakouros-original/ansible-role-nextcloud)
+[![Galaxy](https://img.shields.io/badge/galaxy-nkakouros.nextcloud-blue.svg)](https://galaxy.ansible.com/nkakouros/nextcloud/)
 
 Ansible Role: Nextcloud
 =========
