@@ -1,7 +1,7 @@
 ---
 
 - name: Get global preferences
-  command: php occ config:list --output=json
+  command: ./occ config:list --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   register: _nextcloud_old_preferences

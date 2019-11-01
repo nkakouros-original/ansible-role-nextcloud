@@ -1,7 +1,7 @@
 ---
 
 - name: Create user groups
-  command: php occ group:add "{{ item }}"
+  command: ./occ group:add "{{ item }}"
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   loop: >-
@@ -20,7 +20,7 @@
   become_user: "{{ nextcloud_file_owner }}"
 
 - name: Get user info
-  command: php occ user:info "{{ item.name }}" --output=json
+  command: ./occ user:info "{{ item.name }}" --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   register: _nextcloud_user_info
@@ -30,7 +30,7 @@
   become_user: "{{ nextcloud_file_owner }}"
 
 - name: Add users to groups
-  command: php occ group:adduser "{{ item.1 }}" "{{ item.0.name }}"
+  command: ./occ group:adduser "{{ item.1 }}" "{{ item.0.name }}"
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   loop: "{{ nextcloud_users | subelements('groups') }}"

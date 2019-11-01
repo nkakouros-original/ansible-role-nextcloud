@@ -1,7 +1,7 @@
 ---
 
 - name: Check if upgrade is needed
-  command: php occ status
+  command: ./occ status
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   register: nextcloud_status
@@ -10,7 +10,7 @@
   become_user: "{{ nextcloud_file_owner }}"
 
 - name: Upgrade Nextcloud installation
-  command: php occ upgrade
+  command: ./occ upgrade
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   become: true

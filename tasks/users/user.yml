@@ -1,7 +1,7 @@
 ---
 
 - name: Get user list
-  command: php occ user:list --output=json
+  command: ./occ user:list --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   register: nextcloud_online_users
@@ -24,7 +24,7 @@
 
 - name: Create users
   command: >-
-    php occ user:add
+    ./occ user:add
       "{{ item.name }}"
       --display-name "{{ item.display_name }}"
       --password-from-env
@@ -37,9 +37,8 @@
   become: true
   become_user: "{{ nextcloud_file_owner }}"
 
-# TODO this show as changed always
 - name: Update user password
-  command: php occ user:resetpassword "{{ item.name }}" --password-from-env
+  command: ./occ user:resetpassword "{{ item.name }}" --password-from-env
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   when:

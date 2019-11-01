@@ -8,7 +8,7 @@
         mode: g+w
       listen: nextcloud update htaccess
     - name: Update .htaccess file
-      command: php occ maintenance:update:htaccess --no-interaction
+      command: ./occ maintenance:update:htaccess --no-interaction
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       listen: nextcloud update htaccess

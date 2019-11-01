@@ -51,7 +51,7 @@
       ]
 
 - name: Read existing config values
-  command: "php occ user:setting {{ item.user }} {{ item.app }} {{ item.key }}"
+  command: "./occ user:setting {{ item.user }} {{ item.app }} {{ item.key }}"
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   become: true
@@ -63,7 +63,7 @@
 
 - name: Enable user settings
   command: >-
-    php occ user:setting
+    ./occ user:setting
       {{ item.0.user }}
       {{ item.0.app }}
       {{ item.0.key }}

@@ -1,7 +1,7 @@
 ---
 
 - name: Read builtin apps
-  command: php occ app:list --shipped=SHIPPED --output=json
+  command: ./occ app:list --shipped=SHIPPED --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   register: nextcloud_shipped_apps
@@ -21,7 +21,7 @@
       }}
 
 - name: Read all installed apps
-  command: php occ app:list --output=json
+  command: ./occ app:list --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   become: true
@@ -41,7 +41,7 @@
 - name: Install external apps
   block:
     - name: Find full nextcloud version
-      command: php occ -V
+      command: ./occ -V
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       become: true
@@ -166,7 +166,7 @@
   #       | combine(nextcloud_installed_apps.disabled))
 
 - name: Enable apps
-  command: php occ app:enable "{{ item.name }}"
+  command: ./occ app:enable "{{ item.name }}"
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   become: true

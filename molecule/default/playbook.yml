@@ -64,7 +64,7 @@
   post_tasks:
     - name: Check Nextcloud responds ok
       uri:
-        url: localhost
+        url: http://localhost
         return_content: true
       register: _result
     - name: Check Nextcloud return login form
