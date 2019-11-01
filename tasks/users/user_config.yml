@@ -1,6 +1,7 @@
 ---
 
 - name: Get local python version
+  become: no
   command: python -V
   delegate_to: localhost
   register: localhost_python
