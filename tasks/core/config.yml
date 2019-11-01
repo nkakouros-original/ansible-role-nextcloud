@@ -9,35 +9,46 @@
   become: true
   become_user: "{{ nextcloud_file_owner }}"
 
-# TODO this is unused
 - name: Parse global preferences as json
   set_fact:
     _nextcloud_old_preferences:
       "{{ _nextcloud_old_preferences.stdout | from_json }}"
 
-- name: Save config to file
-  copy:
-    content: "{{ nextcloud_config | to_json }}"
-    dest: /tmp/nextcloud_config_53ab3c4
-    owner: "{{ nextcloud_file_owner }}"
-    mode: 0o400
-  changed_when: false
+- name: Configure nextcloud and apps
+  block:
+    - name: Create temp file
+      tempfile:
+        suffix: nextcloud
+      register: _result
 
-- name: Set up global preferences
-  command:
-    php occ config:import /tmp/nextcloud_config_53ab3c4
-  args:
-    chdir: "{{ nextcloud_installation_dir }}"
-  become: true
-  become_user: "{{ nextcloud_file_owner }}"
-  register: result
-  changed_when: result is success
-  notify: nextcloud update htaccess
+    - name: Save config to file
+      copy:
+        content: "{{ nextcloud_config | to_json }}"
+        dest: "{{ _result.path }}"
+        owner: "{{ nextcloud_file_owner }}"
+        mode: 0o400
 
-- meta: flush_handlers
+    - name: Set up global preferences
+      command: ./occ config:import "{{ _result.path }}"
+      args:
+        chdir: "{{ nextcloud_installation_dir }}"
+      become: true
+      become_user: "{{ nextcloud_file_owner }}"
+      register: result
+      changed_when: result is success
+      notify: nextcloud update htaccess
 
-- name: Delete config file
-  file:
-    path: /tmp/nextcloud_config_53ab3c4
-    state: absent
-  changed_when: false
+    - meta: flush_handlers
+
+    - name: Delete config file
+      file:
+        path: /tmp/nextcloud_config_53ab3c4
+        state: absent
+  when: _nextcloud_prefs_need_updating | bool
+  vars:
+    # Check if nextcloud_config is not a subset of the old preferences
+    _nextcloud_prefs_need_updating: >-
+      {{
+        (nextcloud_config|dict_flatten).items()
+        > (_nextcloud_old_preferences|dict_flatten).items()
+      }}
