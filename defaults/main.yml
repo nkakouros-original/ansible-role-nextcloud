@@ -3,7 +3,7 @@
 nextcloud_enable: true
 # Set this to 'no' to completely disable the role
 
-nextcloud_version: 16
+nextcloud_version: 17
 # The major nextcloud version to install. You can use this to upgrade to a new
 # major version as well. Even if you set 'nextcloud_download_url' manually (see
 # next option), 'nextcloud_version' should be set as it is also used to
