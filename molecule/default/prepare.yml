@@ -25,6 +25,10 @@
       - "php{{ php_default_version_debian }}-gmp"
       - "php{{ php_default_version_debian }}-apcu"
       - "php{{ php_default_version_debian }}-imagick"
+      - "php{{ php_default_version_debian }}-dom"
+      - "php{{ php_default_version_debian }}-gd"
+      - "php{{ php_default_version_debian }}-curl"
+      - "php{{ php_default_version_debian }}-mbstring"
       - php-mcrypt
     apache_remove_default_vhost: true
     apache_vhosts:

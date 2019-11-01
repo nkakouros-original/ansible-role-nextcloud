@@ -2,28 +2,30 @@
 language: python
 python: "2.7"
 
-# Use the new container infrastructure
 sudo: false
 
-# Install ansible
 addons:
   apt:
     packages:
       - python-pip
 
+env:
+  global:
+    ROLE_NAME: nextcloud
+
 install:
-  # Install ansible
   - pip install molecule docker
 
-  # Check ansible version
   - ansible --version
 
   - pwd
 
   # Create ansible.cfg with correct roles_path
-  - printf '[defaults]\nroles_path=../' >ansible.cfg
+  - printf '[defaults]\nroles_path=../' > ansible.cfg
 
 script:
+  - cd ../
+  - mv ansible-role-$ROLE_NAME nkakouros-original.$ROLE_NAME
   - molecule test
 
 notifications:
