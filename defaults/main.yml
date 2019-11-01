@@ -51,6 +51,9 @@ nextcloud_database:
   port: 3306
   # The port the db server listens on
 
+  prefix: oc_
+  # Prefix for the nextcloud tables in the database.
+
 nextcloud_admin_user: admin
 # The name of the admin user
 
