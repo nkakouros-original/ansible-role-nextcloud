@@ -55,7 +55,7 @@
           https://apps.nextcloud.com/api/v1/platform/{{
             nextcloud_full_version.stdout_lines[-1]
             | regex_replace(
-                'Nextcloud \b\w*\b ?([0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}) ?.*',
+                '.* ([0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2})$',
                 '\1'
               )
           }}/apps.json
