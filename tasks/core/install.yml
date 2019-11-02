@@ -24,6 +24,7 @@
   register: _result
   changed_when: false
   failed_when:
+    - _result is failed
     # The updater will automatically try to install any updates if the shell is
     # not interactive (as is the case with here). In that case, it means that
     # Nextcloud has already been installed and an update was found. Assuming

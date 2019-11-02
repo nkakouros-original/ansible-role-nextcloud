@@ -56,7 +56,7 @@
               showWeekNr: true
   pre_tasks:
     - name: Gather facts
-      setup: null
+      setup: ~
       become: false
   tasks:
     - include_role:
@@ -70,4 +70,4 @@
     - name: Check Nextcloud return login form
       assert:
         that:
-          - _result.content is search('<form method="post" name="login">')
+          - _result.content is search('a safe home for all your data')
