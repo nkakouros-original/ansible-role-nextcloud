@@ -103,51 +103,55 @@
       with_items: "{{ nextcloud_apps }}"
       notify:
         - set app files permissions
-      when: >-
-        {#- There are three checks here: -#}
-        {#- 1. The app does not exist in the nextcloud installation -#}
-        (
-          item.name not in
-            nextcloud_shipped_apps.enabled
-            | combine(nextcloud_shipped_apps.disabled)
-            | combine(nextcloud_shipped_apps.enabled)
-            | combine(nextcloud_shipped_apps.disabled)
-        )
-        or
-        {#- 2. The version for an app is different to the one installed -#}
-        (
-          item.name in
-            nextcloud_installed_apps.enabled
-            | combine(nextcloud_installed_apps.disabled)
-          and
-          'version' in item
-          and
-          item.version | default('unset') !=
+      when: download_app | bool
+      vars:
+        download_app: >-
+          {#- There are three checks here: -#}
+          {#- 1. The app does not exist in the nextcloud installation -#}
+          {#- 2. The version for an app is different to the one installed -#}
+          {#- 3. The app was specified without a version, meaning the latest
+                 version available should be downloaded. So, the version from
+                 the appstore is checked against the local version -#}
+          {{
             (
-              nextcloud_installed_apps.enabled
-              | combine(nextcloud_installed_apps.disabled)
-            )[item.name]
-        )
-        or
-        {#- 3. The app was specified without a version, meaning the latest
-               version available should be downloaded. So, the version from the
-               appstore is checked against the locac version -#}
-        (
-          (
-            nextcloud_app_store_json
-            | selectattr('id', 'equalto', item.name)
-            | map(attribute='releases')
-            | first
-            | list
-          )[0].version
-          !=
-          (
+              item.name not in
+                nextcloud_shipped_apps.enabled
+                | combine(nextcloud_shipped_apps.disabled)
+                | combine(nextcloud_shipped_apps.enabled)
+                | combine(nextcloud_shipped_apps.disabled)
+            )
+            or
             (
-              nextcloud_installed_apps.enabled
-              | combine(nextcloud_installed_apps.disabled)
-            ) [item.name]
-          )
-        )
+              item.name in
+                nextcloud_installed_apps.enabled
+                | combine(nextcloud_installed_apps.disabled)
+              and
+              'version' in item
+              and
+              item.version | default('unset') !=
+                (
+                  nextcloud_installed_apps.enabled
+                  | combine(nextcloud_installed_apps.disabled)
+                )[item.name]
+            )
+            or
+            (
+              (
+                nextcloud_app_store_json
+                | selectattr('id', 'equalto', item.name)
+                | map(attribute='releases')
+                | first
+                | list
+              )[0].version
+              !=
+              (
+                (
+                  nextcloud_installed_apps.enabled
+                  | combine(nextcloud_installed_apps.disabled)
+                ) [item.name]
+              )
+            )
+          }}
 
   # Is this really useful? If occ supports app:update, then it makes sense
   # - name: Install external apps

@@ -30,7 +30,7 @@
     # that Nextcloud was installed with this role, .htaccess will no be
     # writtable. This will cause the updater to fail. But this is a failure we
     # can expect.
-    - _result.stdout is not match('The following places can not be written to')
+    - _result.stdout is not search('The following places can not be written to')
   when: _result.stat.exists | bool
 
 - name: Download nextcloud
