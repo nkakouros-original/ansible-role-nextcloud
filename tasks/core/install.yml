@@ -75,8 +75,7 @@
           --database-pass "{{ nextcloud_database.pass }}"
           --database-host "{{ nextcloud_database.host }}"
           --database-port "{{ nextcloud_database.port }}"
-          --database-table-prefix "{{
-                              nextcloud_database.prefix | default('oc_') }}"
+          --database-table-prefix "{{ nextcloud_database.prefix }}"
           --admin-user "{{ nextcloud_admin_user }}"
           --admin-pass "{{ nextcloud_admin_pass }}"
           --data-dir "{{ nextcloud_data_dir }}"

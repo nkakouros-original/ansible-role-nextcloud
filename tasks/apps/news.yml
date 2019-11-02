@@ -230,4 +230,3 @@
 #   # changed_when: result is success
 #   loop: "{{ nextcloud_users[0]['app_config']['news']['feeds'] }}"
 #   delegate_to: localhost
-

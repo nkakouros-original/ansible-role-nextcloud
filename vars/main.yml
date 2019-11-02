@@ -25,3 +25,6 @@ _nextcloud_database:
 
   port: 3306
   # The port the db server listens on
+
+  prefix: oc_
+  # Prefix for the nextcloud tables in the database.
