@@ -41,24 +41,22 @@
 - name: Install external apps
   block:
     - name: Find full nextcloud version
-      command: ./occ -V
+      command: ./occ status  --output=json
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       become: true
       become_user: "{{ nextcloud_file_owner }}"
-      register: nextcloud_full_version
+      register: _output
       changed_when: false
+
+    - name: Remove non-json text from command output
+      set_fact:
+        nextcloud_full_version: "{{ _output.stdout | from_json }}"
 
     - name: Create app json file url
       set_fact:
         nextcloud_app_store_json_url: >-
-          https://apps.nextcloud.com/api/v1/platform/{{
-            nextcloud_full_version.stdout_lines[-1]
-            | regex_replace(
-                '.* ([0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2})$',
-                '\1'
-              )
-          }}/apps.json
+          https://apps.nextcloud.com/api/v1/platform/{{ nextcloud_full_version.versionstring }}/apps.json
       changed_when: false
 
     - name: Download the app json file
