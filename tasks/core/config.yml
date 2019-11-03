@@ -49,6 +49,7 @@
     # Check if nextcloud_config is not a subset of the old preferences
     _nextcloud_prefs_need_updating: >-
       {{
-        (nextcloud_config|dict_flatten).items()
-        > (_nextcloud_old_preferences|dict_flatten).items()
+        not ((_nextcloud_old_preferences |
+        combine(nextcloud_config, recursive=True))
+        == _nextcloud_old_preferences)
       }}
