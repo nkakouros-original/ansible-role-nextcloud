@@ -51,7 +51,8 @@
 
     - name: Remove non-json text from command output
       set_fact:
-        nextcloud_full_version: "{{ (_result.stdout | from_json)['versionstring'] }}"
+        nextcloud_full_version:
+          "{{ (_result.stdout | from_json)['versionstring'] }}"
 
     - name: Create app json file url
       set_fact:
