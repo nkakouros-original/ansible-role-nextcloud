@@ -43,7 +43,7 @@
       register: result
       changed_when: result is success
       notify: nextcloud update htaccess
-      failed_when: (result.stdout|search('invalid entries') or result.rc != 0)
+      failed_when: (result.stdout|lower|search('invalid') or result.rc != 0)
 
     - meta: flush_handlers
 
