@@ -18,6 +18,7 @@
       {{
         _result.stdout | from_json | combine(nextcloud_config, recursive=True)
       }}
+  no_log: true
 
 - name: Configure nextcloud and apps
   block:
