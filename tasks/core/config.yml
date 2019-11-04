@@ -4,7 +4,7 @@
   command: ./occ config:list --private --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
-  register: _nextcloud_old_preferences
+  register: _result
   changed_when: false
   no_log: true
   become: true
@@ -13,10 +13,10 @@
 - name: Parse global preferences as json and merge configurations
   set_fact:
     _nextcloud_old_preferences:
-      "{{ _nextcloud_old_preferences.stdout | from_json }}"
+      "{{ _result.stdout | from_json }}"
     _nextcloud_updated_preferences: >-
       {{
-        _nextcloud_old_preferences | combine(nextcloud_config, recursive=True)
+        _result.stdout | from_json | combine(nextcloud_config, recursive=True)
       }}
 
 - name: Configure nextcloud and apps
