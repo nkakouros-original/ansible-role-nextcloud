@@ -49,12 +49,4 @@
       file:
         path: /tmp/nextcloud_config_53ab3c4
         state: absent
-  when: _nextcloud_prefs_need_updating | bool
-  vars:
-    # Check if nextcloud_config is not a subset of the old preferences
-    _nextcloud_prefs_need_updating: >-
-      {{
-        not ((_nextcloud_old_preferences |
-        combine(nextcloud_config, recursive=True))
-        == _nextcloud_old_preferences)
-      }}
+  when: not (_nextcloud_updated_preferences == _nextcloud_old_preferences)
