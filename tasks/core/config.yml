@@ -43,8 +43,8 @@
       register: result
       changed_when: result is success
       notify: nextcloud update htaccess
-      failed_when: (not (result.stdout | search('successfully imported'))
-        or result.rc != 0)
+      failed_when: (result.stdout is not search('successfully imported')
+        or result is failed)
 
     - meta: flush_handlers
 
@@ -52,4 +52,4 @@
       file:
         path: /tmp/nextcloud_config_53ab3c4
         state: absent
-  when: not (_nextcloud_updated_preferences == _nextcloud_old_preferences)
+  when: _nextcloud_updated_preferences != _nextcloud_old_preferences
