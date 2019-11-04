@@ -6,6 +6,7 @@
     chdir: "{{ nextcloud_installation_dir }}"
   register: _nextcloud_old_preferences
   changed_when: false
+  no_log: true
   become: true
   become_user: "{{ nextcloud_file_owner }}"
 
