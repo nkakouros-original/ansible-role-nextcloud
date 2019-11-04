@@ -1,7 +1,7 @@
 ---
 
 - name: Read builtin apps
-  command: ./occ app:list --shipped=SHIPPED --output=json
+  command: ./occ app:list --shipped=true --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   register: nextcloud_shipped_apps
