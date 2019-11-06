@@ -38,6 +38,10 @@
         ]
       }}
 
+# Install all apps from the configured list which
+# - are external apps (not in the shipped apps list) and
+# - are not yet installed (not in the installed apps list) and
+# - have their state not set to "absent"
 - name: Install external apps
   command: php occ app:install "{{ item.name }}"
   with_items: "{{ nextcloud_apps }}"
@@ -48,31 +52,13 @@
   failed_when: result.stdout is not search('installed') or result is failed
   changed_when: result is not failed
   when: >-
-    nextcloud_version >= 13 and
+    item.name not in (nextcloud_shipped_apps.enabled
+    | combine(nextcloud_shipped_apps.disabled)) and
     item.name not in (nextcloud_installed_apps.enabled
-    | combine(nextcloud_installed_apps.disabled))
+    | combine(nextcloud_installed_apps.disabled)) and
+    (item.state | default('enabled') != 'absent')
 
-- name: Update external apps
-  command: php occ app:update "{{ item }}"
-  with_items: "{{ (nextcloud_installed_apps.enabled
-    | combine(nextcloud_installed_apps.disabled)) }}"
-  become_user: "{{ nextcloud_file_owner }}"
-  args:
-    chdir: "{{ nextcloud_installation_dir }}"
-  register: result
-  failed_when: result.stdout is search('not installed') or result is failed
-  changed_when: result.stdout is search('updated') and result is not failed
-  when: nextcloud_version >= 13
-
-- name: Enable apps
-  command: ./occ app:enable "{{ item.name }}"
-  args:
-    chdir: "{{ nextcloud_installation_dir }}"
-  become: true
-  become_user: "{{ nextcloud_file_owner }}"
-  with_items: "{{ nextcloud_apps }}"
-  when: item.name not in nextcloud_installed_apps.enabled
-
+# Update list of available apps after installation and removal:
 - name: Re-read installed external apps
   command: ./occ app:list --shipped=false --output=json
   args:
@@ -90,3 +76,43 @@
           (nextcloud_installed_apps.stdout.find('{')):
         ]
       }}
+
+# Check and update all external apps
+- name: Update external apps
+  command: php occ app:update "{{ item }}"
+  with_items: "{{ (nextcloud_installed_apps.enabled
+    | combine(nextcloud_installed_apps.disabled)) }}"
+  become_user: "{{ nextcloud_file_owner }}"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  register: result
+  failed_when: result.stdout is search('not installed') or result is failed
+  changed_when: result.stdout is search('updated') and result is not failed
+
+# Enable all apps from the configured list which
+# - are not yet enabled and
+# - have their state set to "enabled"
+- name: Enable apps
+  command: ./occ app:enable "{{ item.name }}"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  become: true
+  become_user: "{{ nextcloud_file_owner }}"
+  with_items: "{{ nextcloud_apps }}"
+  when: >-
+    (item.state | default('enabled')) == 'enabled' and
+    item.name not in (nextcloud_installed_apps.enabled | combine(nextcloud_shipped_apps.enabled))
+
+# Disable all apps from the configured list which
+# - are not yet disabled and
+# - have their state set to "disabled"
+- name: Disable apps
+  command: ./occ app:disable "{{ item.name }}"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  become: true
+  become_user: "{{ nextcloud_file_owner }}"
+  with_items: "{{ nextcloud_apps }}"
+  when: >-
+    (item.state | default('enabled')) == 'disabled' and
+    item.name not in (nextcloud_installed_apps.disabled | combine(nextcloud_shipped_apps.disabled))
