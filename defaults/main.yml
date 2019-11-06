@@ -73,22 +73,22 @@ nextcloud_urls:
 # will be as the "main" one, for pretty urls, etc.
 
 nextcloud_apps: []
-# Nextcloud apps to be installed, enabled or disabled
+# Nextcloud apps to be installed, removed, enabled or disabled
 # It is a list of hashes. Eg
 #
 # nextcloud_apps:
 #   - name: calendar
-#     version: 1.5.7
 #     state: enabled
 #
 # The action can be defined using the app's state, the following states are supported:
 # - present: The app will be installed, the enabled status will not be changed
-# - absent: The app will be removed
+# - absent: The app will be removed. Only available for external apps.
 # - enabled: The app will be installed if not available yet, and will be enabled
 # - disabled: The app will be installed if not available yet, and will be disabled
 # 
-# If 'version' is not given, then the latest version available for the installed
-# nextcloud version will be installed.
+# Installation and removal is only supported for external apps, apps shipped with
+# Nextcloud can only be enabled or disabled.
+# Currently, always the latest version available from the App Store is installed.
 
 nextcloud_config: {}
 # A yaml array with settings of nextcloud apps.
