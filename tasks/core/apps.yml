@@ -1,5 +1,25 @@
 ---
 
+# Read all apps shipped by Nextcloud itself
+- name: Read shipped apps
+  command: ./occ app:list --shipped=true --output=json
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  become: true
+  become_user: "{{ nextcloud_file_owner }}"
+  register: nextcloud_shipped_apps
+  changed_when: false
+
+- name: Remove non-json text from command output
+  set_fact:
+    nextcloud_shipped_apps: >-
+      {{
+        nextcloud_shipped_apps.stdout[
+          (nextcloud_shipped_apps.stdout.find('{')):
+        ]
+      }}
+
+# Read all external apps which have been installed by in addition
 - name: Read installed external apps
   command: ./occ app:list --shipped=false --output=json
   args:
