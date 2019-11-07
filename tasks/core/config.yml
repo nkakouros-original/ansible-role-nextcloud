@@ -22,7 +22,7 @@
 
 - name: Configure nextcloud and apps
   block:
-    - name: Create temp file
+    - name: Create temporary config file
       tempfile:
         suffix: nextcloud
       register: _result
@@ -48,8 +48,8 @@
 
     - meta: flush_handlers
 
-    - name: Delete config file
+    - name: Delete temporary config file
       file:
-        path: /tmp/nextcloud_config_53ab3c4
+        path: "{{ _result.path }}"
         state: absent
   when: _nextcloud_updated_preferences != _nextcloud_old_preferences
