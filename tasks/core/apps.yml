@@ -45,6 +45,7 @@
   command: php occ app:remove "{{ item }}"
   with_items: "{{ (nextcloud_installed_apps.enabled |
     combine(nextcloud_installed_apps.disabled)) }}"
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
   args:
     chdir: "{{ nextcloud_installation_dir }}"
@@ -62,6 +63,7 @@
 - name: Install external apps
   command: php occ app:install "{{ item.name }}"
   with_items: "{{ nextcloud_apps }}"
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
   args:
     chdir: "{{ nextcloud_installation_dir }}"
@@ -99,6 +101,7 @@
   command: php occ app:update "{{ item }}"
   with_items: "{{ (nextcloud_installed_apps.enabled
     | combine(nextcloud_installed_apps.disabled)) }}"
+  become: true
   become_user: "{{ nextcloud_file_owner }}"
   args:
     chdir: "{{ nextcloud_installation_dir }}"
