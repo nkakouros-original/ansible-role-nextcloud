@@ -134,4 +134,5 @@
   when: >-
     (item.state | default('enabled')) == 'disabled' and
     item.name not in
-    (nextcloud_installed_apps.disabled | combine(nextcloud_shipped_apps.disabled))
+    (nextcloud_installed_apps.disabled
+    | combine(nextcloud_shipped_apps.disabled))

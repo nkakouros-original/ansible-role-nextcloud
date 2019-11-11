@@ -80,15 +80,19 @@ nextcloud_apps: []
 #   - name: calendar
 #     state: enabled
 #
-# The action can be defined using the app's state, the following states are supported:
+# The action can be defined using the app's state, the following states are
+# supported:
 # - present: The app will be installed, the enabled status will not be changed
 # - absent: The app will be removed. Only available for external apps.
-# - enabled: The app will be installed if not available yet, and will be enabled
-# - disabled: The app will be installed if not available yet, and will be disabled
-# 
-# Installation and removal is only supported for external apps, apps shipped with
-# Nextcloud can only be enabled or disabled.
-# Currently, always the latest version available from the App Store is installed.
+# - enabled: The app will be installed if not available yet, and will be
+#   enabled
+# - disabled: The app will be installed if not available yet, and will be
+#   disabled
+#
+# Installation and removal is only supported for external apps, apps shipped
+# with Nextcloud can only be enabled or disabled.
+# Currently, always the latest version available from the App Store is
+# installed.
 
 nextcloud_config: {}
 # A yaml array with settings of nextcloud apps.
