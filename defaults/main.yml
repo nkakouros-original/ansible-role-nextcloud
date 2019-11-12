@@ -72,6 +72,10 @@ nextcloud_urls:
 # You would normally need only one. If you specify more than one, the first one
 # will be as the "main" one, for pretty urls, etc.
 
+nextcloud_remove_unknown_apps: false
+# Setting to choose whether to remove or keep external apps which have not been
+# installed through this role, but manually or via the Nextcloud admin interface
+
 nextcloud_apps: []
 # Nextcloud apps to be installed, removed, enabled or disabled
 # It is a list of hashes. Eg
@@ -90,7 +94,9 @@ nextcloud_apps: []
 #   disabled
 #
 # Installation and removal is only supported for external apps, apps shipped
-# with Nextcloud can only be enabled or disabled.
+# with Nextcloud can only be enabled or disabled. By default, only apps with
+# the explicit state `absent` are removed, to remove all apps missing from the
+# list, set `nextcloud_remove_unknown_apps: true`.
 # Currently, always the latest version available from the App Store is
 # installed.
 
