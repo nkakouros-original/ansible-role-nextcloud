@@ -38,16 +38,9 @@
         ]
       }}
 
-- name: Set default package state
-  set_fact:
-    _default_state: >-
-      {% if nextcloud_remove_unknown_apps %}absent{% else %}enabled{% endif %}
-
-# Remove all apps from the list of external apps which
-# - is not in the configured list of apps
-#   (only if nextcloud_remove_unknown_apps is set to true)
-# - is in the configured list of apps but have their state set to "absent"
-- name: Remove external apps
+# Remove all apps from the list of external apps which are not in the
+# configured list of apps, if nextcloud_remove_unknown_apps is set to true
+- name: Remove unknown external apps
   command: php occ app:remove "{{ item }}"
   with_items: "{{ (nextcloud_installed_apps.enabled |
     combine(nextcloud_installed_apps.disabled)) }}"
@@ -58,9 +51,25 @@
   register: result
   failed_when: result.stdout is not search('removed') or result is failed
   changed_when: result is not failed
-  when: >-
-    ((nextcloud_apps | selectattr('name', 'search', item) | list | first
-    | default({'state':_default_state})).state | default('enabled')) == 'absent'
+  when:
+    - nextcloud_remove_unknown_apps
+    - not (nextcloud_apps | selectattr('name', 'search', item) | list)
+
+# Remove all apps which have their state set to "absent"
+- name: Remove external apps
+  command: php occ app:remove "{{ item.name }}"
+  with_items: "{{ nextcloud_apps }}"
+  become: true
+  become_user: "{{ nextcloud_file_owner }}"
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  register: result
+  failed_when: result.stdout is not search('removed') or result is failed
+  changed_when: result is not failed
+  when:
+    - item.name in (nextcloud_installed_apps.enabled
+      | combine(nextcloud_installed_apps.disabled))
+    - item.state | default('enabled') == 'absent'
 
 # Install all apps from the configured list which
 # - are external apps (not in the shipped apps list) and
