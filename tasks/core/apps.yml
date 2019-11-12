@@ -2,41 +2,31 @@
 
 # Read all apps shipped by Nextcloud itself
 - name: Read shipped apps
-  command: ./occ app:list --shipped=true --output=json
+  command: ./occ app:list --shipped=true --no-warnings --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   become: true
   become_user: "{{ nextcloud_file_owner }}"
-  register: nextcloud_shipped_apps
+  register: _result
   changed_when: false
 
 - name: Remove non-json text from command output
   set_fact:
-    nextcloud_shipped_apps: >-
-      {{
-        nextcloud_shipped_apps.stdout[
-          (nextcloud_shipped_apps.stdout.find('{')):
-        ]
-      }}
+    nextcloud_shipped_apps: "{{ _result.stdout | from_json }}"
 
 # Read all external apps which have been installed by in addition
 - name: Read installed external apps
-  command: ./occ app:list --shipped=false --output=json
+  command: ./occ app:list --shipped=false --no-warnings --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   become: true
   become_user: "{{ nextcloud_file_owner }}"
-  register: nextcloud_installed_apps
+  register: _result
   changed_when: false
 
 - name: Remove non-json text from command output
   set_fact:
-    nextcloud_installed_apps: >-
-      {{
-        nextcloud_installed_apps.stdout[
-          (nextcloud_installed_apps.stdout.find('{')):
-        ]
-      }}
+    nextcloud_installed_apps: "{{ _result.stdout | from_json }}"
 
 # Remove all apps from the list of external apps which are not in the
 # configured list of apps, if nextcloud_remove_unknown_apps is set to true
@@ -94,22 +84,17 @@
 
 # Update list of available apps after installation and removal:
 - name: Re-read installed external apps
-  command: ./occ app:list --shipped=false --output=json
+  command: ./occ app:list --shipped=false --no-warnings --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   become: true
   become_user: "{{ nextcloud_file_owner }}"
-  register: nextcloud_installed_apps
+  register: _result
   changed_when: false
 
 - name: Remove non-json text from command output
   set_fact:
-    nextcloud_installed_apps: >-
-      {{
-        nextcloud_installed_apps.stdout[
-          (nextcloud_installed_apps.stdout.find('{')):
-        ]
-      }}
+    nextcloud_installed_apps:  "{{ _result.stdout | from_json }}"
 
 # Check and update all external apps
 - name: Update external apps
