@@ -72,19 +72,47 @@ nextcloud_urls:
 # You would normally need only one. If you specify more than one, the first one
 # will be as the "main" one, for pretty urls, etc.
 
+nextcloud_remove_unknown_apps: false
+# Setting to choose whether to remove or keep external apps which have not been
+# installed through this role, but manually or via the Nextcloud admin interface
+
 nextcloud_apps: []
-# The ansible apps to install and enable
+# Nextcloud apps to be installed, removed, enabled or disabled
 # It is a list of hashes. Eg
 #
 # nextcloud_apps:
 #   - name: calendar
-#     version: 1.5.7
+#     state: enabled
 #
-# If 'version' is not given, then the latest version available for the installed
-# nextcloud version will be installed.
+# The action can be defined using the app's state, the following states are
+# supported:
+# - present: The app will be installed, the enabled status will not be changed
+# - absent: The app will be removed. Only available for external apps.
+# - enabled: The app will be installed if not available yet, and will be
+#   enabled
+# - disabled: The app will be installed if not available yet, and will be
+#   disabled
+#
+# Installation and removal is only supported for external apps, apps shipped
+# with Nextcloud can only be enabled or disabled. By default, only apps with
+# the explicit state `absent` are removed, to remove all apps missing from the
+# list, set `nextcloud_remove_unknown_apps: true`.
+# Currently, always the latest version available from the App Store is
+# installed.
 
 nextcloud_config: {}
-# A yaml array with settings of nextcloud apps. For instance:
+# A yaml array with settings of nextcloud apps.
+#
+# Nextcloud organizes its configuration in two categories:
+# - system: this category contains all basic configuration parameters for the
+#           framework to operate. Its keys are stored in the `config.php` file
+#           of the instance installation's `config` directory.
+# - apps: this category contains settings for the individual apps as well as
+#         for some core components of the framework (in `core`). These settings
+#         are stored in the database directly and require a correctly
+#         configured system to be accessed.
+#
+# For instance:
 # ```
 # nextcloud_config:
 #   apps:
