@@ -101,7 +101,7 @@ nextcloud_config: {}
 # - system: this category contains all basic configuration parameters for the
 #           framework to operate. Its keys are stored in the `config.php` file
 #           of the instance installation's `config` directory.
-# - apps: this categoriy contains settings for the individual apps as well as
+# - apps: this category contains settings for the individual apps as well as
 #         for some core components of the framework (in `core`). These settings
 #         are stored in the database directly and require a correctly
 #         configured system to be accessed.
