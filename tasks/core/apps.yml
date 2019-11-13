@@ -94,7 +94,7 @@
 
 - name: Remove non-json text from command output
   set_fact:
-    nextcloud_installed_apps:  "{{ _result.stdout | from_json }}"
+    nextcloud_installed_apps: "{{ _result.stdout | from_json }}"
 
 # Check and update all external apps
 - name: Update external apps
