@@ -65,7 +65,7 @@
         state: directory
         owner: "{{ nextcloud_file_owner }}"
         group: "{{ nextcloud_file_owner }}"
-        mode: 0o755
+        mode: 0o750
 
     - name: Install nextcloud
       command: >-
