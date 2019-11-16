@@ -1,22 +1,28 @@
 ---
 
 - name: Get global preferences
-  command: ./occ config:list --output=json
+  command: ./occ config:list --private --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
-  register: _nextcloud_old_preferences
+  register: _result
   changed_when: false
+  no_log: true
   become: true
   become_user: "{{ nextcloud_file_owner }}"
 
-- name: Parse global preferences as json
+- name: Parse global preferences as json and merge configurations
   set_fact:
     _nextcloud_old_preferences:
-      "{{ _nextcloud_old_preferences.stdout | from_json }}"
+      "{{ _result.stdout | from_json }}"
+    _nextcloud_updated_preferences: >-
+      {{
+        _result.stdout | from_json | combine(nextcloud_config, recursive=True)
+      }}
+  no_log: true
 
 - name: Configure nextcloud and apps
   block:
-    - name: Create temp file
+    - name: Create temporary config file
       tempfile:
         suffix: nextcloud
       register: _result
@@ -37,18 +43,13 @@
       register: result
       changed_when: result is success
       notify: nextcloud update htaccess
+      failed_when: (result.stdout is not search('successfully imported')
+        or result is failed)
 
     - meta: flush_handlers
 
-    - name: Delete config file
+    - name: Delete temporary config file
       file:
-        path: /tmp/nextcloud_config_53ab3c4
+        path: "{{ _result.path }}"
         state: absent
-  when: _nextcloud_prefs_need_updating | bool
-  vars:
-    # Check if nextcloud_config is not a subset of the old preferences
-    _nextcloud_prefs_need_updating: >-
-      {{
-        (nextcloud_config|dict_flatten).items()
-        > (_nextcloud_old_preferences|dict_flatten).items()
-      }}
+  when: _nextcloud_updated_preferences != _nextcloud_old_preferences
