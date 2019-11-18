@@ -10,7 +10,7 @@
   register: _result
   changed_when: false
 
-- name: Remove non-json text from command output
+- name: Parse occ command response as JSON
   set_fact:
     nextcloud_shipped_apps: "{{ _result.stdout | from_json }}"
 
@@ -24,7 +24,7 @@
   register: _result
   changed_when: false
 
-- name: Remove non-json text from command output
+- name: Parse occ command response as JSON
   set_fact:
     nextcloud_installed_apps: "{{ _result.stdout | from_json }}"
 
@@ -92,7 +92,7 @@
   register: _result
   changed_when: false
 
-- name: Remove non-json text from command output
+- name: Parse occ command response as JSON
   set_fact:
     nextcloud_installed_apps: "{{ _result.stdout | from_json }}"
 
