@@ -1,0 +1,43 @@
+---
+
+- name: Make occ executable
+  file:
+    path: "{{ nextcloud_installation_dir }}/occ"
+    mode: "u+x"
+    owner: "{{ nextcloud_file_owner }}"
+    group: "{{ nextcloud_file_owner }}"
+  when: nextcloud_occ_make_executable | bool
+
+- name: Make occ available as a system command
+  copy:
+    content: >-
+      sudo --preserve-env --user {{ nextcloud_file_owner }} \
+        '{{ nextcloud_installation_dir }}/occ' "$@"
+    dest: /usr/bin/occ
+    owner: root
+    group: root
+  when: nextcloud_occ_system_command | bool
+
+- name: Setup completion for occ
+  block:
+    - name: Read occ completion functions
+      command: php occ _completion --generate-hook --shell-type bash
+      args:
+        chdir: "{{ nextcloud_installation_dir }}"
+      become: true
+      become_user: "{{ nextcloud_file_owner }}"
+      changed_when: false
+      register: _occ_completion
+
+    - name: Install bash_completion
+      package:
+        name: bash-completion
+
+    - name: Setup occ completion
+      copy:
+        content: "{{ _occ_completion.stdout }}"
+        dest: '/etc/bash_completion.d/nextcloud'
+        owner: root
+        group: root
+        mode: 0o644
+  when: nextcloud_occ_completions | bool

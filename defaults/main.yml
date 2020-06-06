@@ -68,6 +68,19 @@ nextcloud_urls:
 # You would normally need only one. If you specify more than one, the first one
 # will be as the "main" one, for pretty urls, etc.
 # }}}
+# occ {{{
+nextcloud_occ_make_executable: true
+# Whether to make the occ tool executable (to avoid using `php occ ...` and use
+# `occ ...` directly).
+
+nextcloud_occ_system_command: true
+# Whether to create a /usr/bin/occ executable script that will allow all users
+# of the system to run `occ` (with completion if `nextcloud_occ_completions` is
+# enabled). The script calls sudo to run `occ` as the nextcloud user.
+
+nextcloud_occ_completions: true
+# Whether to enable bash completion for the occ tool
+# }}}
 # Users {{{
 nextcloud_admin_user: admin
 # The name of the admin user

@@ -77,9 +77,4 @@
       become_user: "{{ nextcloud_file_owner }}"
       notify: nextcloud set file permissions
 
-    - name: Make occ executable
-      file:
-        path: "{{ nextcloud_installation_dir }}/occ"
-        mode: "u+x"
-
   when: _result is not skipped

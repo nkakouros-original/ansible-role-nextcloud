@@ -186,8 +186,8 @@
   loop: "{{ _nextcloud_news_users | subelements('app_config.news.feeds') }}"
   delegate_to: localhost
 
-# TODO: does not work, says method not allowed
-# https://github.com/nextcloud/news/issues/711
+# TODO this is a v2 api endpoint. I need to break it into `rename` and
+# move-to-folder api calls for v1-2
 # - name: Update feeds
 #   uri:
 #     method: PATCH

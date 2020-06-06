@@ -4,13 +4,15 @@
 
 - include_tasks: core/install.yml
 
+- include_tasks: core/upgrade.yml
+
 - include_tasks: core/apps.yml
 
 - include_tasks: core/integrity.yml
 
-- include_tasks: core/upgrade.yml
-
 - include_tasks: core/config.yml
+
+- include_tasks: core/occ.yml
 
 - include_tasks: users/user.yml
 
