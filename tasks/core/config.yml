@@ -1,7 +1,7 @@
 ---
 
 - name: Get global preferences
-  command: ./occ config:list --private --output=json
+  command: php occ config:list --private --output=json
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   register: _result
@@ -35,7 +35,7 @@
         mode: 0o400
 
     - name: Set up global preferences
-      command: ./occ config:import "{{ _result.path }}"
+      command: php occ config:import "{{ _result.path }}"
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       become: true

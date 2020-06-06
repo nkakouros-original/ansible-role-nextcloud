@@ -10,9 +10,8 @@ def read_opml(path):
         import listparser
     except Exception:
         raise errors.AnsibleFilterError(
-            'the "opml" filter requires the \
-                "listparser" python module, install with `pip install \
-                listparser`'
+            'the "opml" filter requires the "listparser" python module,'
+            + "install with `pip install listparser`"
         )
 
     try:

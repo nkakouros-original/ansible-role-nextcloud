@@ -8,7 +8,7 @@
         mode: g+w
       listen: nextcloud update htaccess
     - name: Update .htaccess file
-      command: ./occ maintenance:update:htaccess --no-interaction
+      command: php occ maintenance:update:htaccess --no-interaction
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       listen: nextcloud update htaccess
@@ -20,12 +20,28 @@
         mode: g-w
       listen: nextcloud update htaccess
 
-- name: Set permissions on downloaded apps
-  file:
-    path: "{{ nextcloud_installation_dir }}/apps/"
-    mode: u=rwX,g=rX,o=rX
-    owner: "{{ nextcloud_file_owner }}"
-    group: "{{ nextcloud_file_owner }}"
-    state: directory
-    recurse: true
-  listen: set app files permissions
+- name: Set file permissions on Nextcloud files
+  block:
+    - name: Set Nextcloud file permissions
+      file:
+        path: "{{ nextcloud_installation_dir }}"
+        mode: u=rwX,g=rX,o-rwx
+        owner: "{{ nextcloud_file_owner }}"
+        group: "{{ nextcloud_file_owner }}"
+        recurse: true
+      listen: nextcloud set file permissions
+    - name: Set permissions on installation directory
+      file:
+        path: "{{ nextcloud_installation_dir }}"
+        owner: root
+        group: "{{ nextcloud_file_owner }}"
+        mode: 0o750
+        state: directory
+      listen: nextcloud set file permissions
+    - name: Set permissions on htaccess file
+      file:
+        path: "{{ nextcloud_installation_dir }}/.htaccess"
+        owner: root
+        group: "{{ nextcloud_file_owner }}"
+        mode: 0o644
+      listen: nextcloud set file permissions

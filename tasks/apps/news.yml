@@ -16,7 +16,6 @@
     _nextcloud_news_users: >-
       {{
         nextcloud_users
-        | selectattr('app_config', 'defined')
         | selectattr('app_config.news', 'defined')
         | list
       }}
@@ -188,45 +187,66 @@
   delegate_to: localhost
 
 # TODO: does not work, says method not allowed
+# https://github.com/nextcloud/news/issues/711
 # - name: Update feeds
 #   uri:
 #     method: PATCH
 #     url: >-
-#       {{
-#         nextcloud_urls[0]
-#       }}/apps/news/api/v1-2/feeds/{{
+#       {{ _nextcloud_api_url_news }}/feeds/{{
 #         (
-#           _nextcloud_existing_feeds.json.feeds
-#           | selectattr('url', 'equalto', item.url)
+#           _nextcloud_existing_feeds.results[
+#             (
+#               _nextcloud_news_users
+#               | map(attribute='name')
+#               | flatten
+#             ).index(item.0.name)
+#           ]['json']['feeds']
+#           | selectattr('url', 'equalto', item.1.url)
 #           | list
 #           | last
 #         )['id']
 #       }}
 #     body_format: json
 #     body:
-#       url: "{{ item.url }}"
+#       url: "{{ item.1.url }}"
 #       folderId: >-
 #         {{
 #           (
-#             _nextcloud_existing_folders.json.folders
-#             | selectattr('name', 'equalto', 'kde')
+#             _nextcloud_existing_folders.results[
+#               (
+#                 _nextcloud_news_users
+#                 | map(attribute='name')
+#                 | flatten
+#               ).index(item.0.name)
+#             ]['json']['folders']
+#             | selectattr(
+#               'name',
+#               'equalto',
+#               item.1.folder
+#               | default([])
+#               | first
+#               | default('')
+#             )
 #             | list
-#             | first
+#             | last
+#             | default('__undefined__')
 #           )['id']
+#           | default(omit)
 #         }}
 #     headers:
-#       Authorization: Basic {{ (item.name + ':' + item.pass) | b64encode }}
+#       Authorization: Basic {{ (item.0.name + ':' + item.0.pass) | b64encode }}
 #   when: >-
-#     _nextcloud_existing_feeds.json.feeds
-#     | selectattr('url', 'equalto', item.url)
+#     _nextcloud_existing_feeds.results[
+#       (
+#         _nextcloud_news_users
+#         | map(attribute='name')
+#         | flatten
+#       ).index(item.0.name)
+#     ]['json']['feeds']
+#     | selectattr('url', 'equalto', item.1.url)
 #     | list
-#     | last
-#     | attr('folder')
-#     | default('__not_defined__')
-#     !=
-#     item.folder
-#     | default('__not_defined__')
+#     | length > 0
 #   register: result
-#   # changed_when: result is success
-#   loop: "{{ nextcloud_users[0]['app_config']['news']['feeds'] }}"
+#   changed_when: result is success
+#   loop: "{{ _nextcloud_news_users | subelements('app_config.news.feeds') }}"
 #   delegate_to: localhost

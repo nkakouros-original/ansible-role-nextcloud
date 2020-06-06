@@ -1,7 +1,41 @@
 ---
 
+- name: Check if update is available
+  command: php occ update:check --no-interaction
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  become: true
+  become_user: "{{ nextcloud_file_owner }}"
+  register: _result
+  changed_when: _result.stdout | regex_search('^Nextcloud .* is available')
+  failed_when: _result is failed
+
+- name: Make files writable by php user
+  file:
+    path: "{{ nextcloud_installation_dir }}"
+    mode: u=rwX,g=rX,o=rX
+    owner: "{{ nextcloud_file_owner }}"
+    group: "{{ nextcloud_file_owner }}"
+    recurse: true
+  when: _result.stdout | regex_search('^Nextcloud .* is available')
+  # Make sure to correctly set file permissions after the installation
+  notify: nextcloud set file permissions
+
+- name: Update Nextcloud installation
+  command: php updater/updater.phar --no-interaction
+  args:
+    chdir: "{{ nextcloud_installation_dir }}"
+  become: true
+  become_user: "{{ nextcloud_file_owner }}"
+  register: _result
+  failed_when:
+    - _result is failed
+    - _result.stdout is not search('Update successful')
+  # We only check for an upgrade of Nextcloud itself, not of the apps
+  when: _result.stdout | regex_search('^Nextcloud .* is available')
+
 - name: Check if upgrade is needed
-  command: ./occ status
+  command: php occ status
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   register: nextcloud_status
@@ -10,7 +44,7 @@
   become_user: "{{ nextcloud_file_owner }}"
 
 - name: Upgrade Nextcloud installation
-  command: ./occ upgrade
+  command: php occ upgrade
   args:
     chdir: "{{ nextcloud_installation_dir }}"
   become: true

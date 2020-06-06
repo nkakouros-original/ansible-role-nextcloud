@@ -3,6 +3,7 @@
 nextcloud_enable: true
 # Set this to 'no' to completely disable the role
 
+# Installation {{{
 nextcloud_version: 17
 # The major nextcloud version to install. You can use this to upgrade to a new
 # major version as well. Even if you set 'nextcloud_download_url' manually (see
@@ -53,13 +54,8 @@ nextcloud_database:
 
   prefix: oc_
   # Prefix for the nextcloud tables in the database.
-
-nextcloud_admin_user: admin
-# The name of the admin user
-
-nextcloud_admin_pass: ''
-# The password of the admin user. This variable should not be empty.
-
+# }}}
+# Core configuration {{{
 # TODO make this part of nextcloud_config_system
 nextcloud_enable_pretty_urls: true
 # Set to yes to enable urls of the form https://example.org/calendar replacing
@@ -71,7 +67,37 @@ nextcloud_urls:
 # This is a list of urls where your nextcloud installation should be accessible.
 # You would normally need only one. If you specify more than one, the first one
 # will be as the "main" one, for pretty urls, etc.
+# }}}
+# Users {{{
+nextcloud_admin_user: admin
+# The name of the admin user
 
+nextcloud_admin_pass: ''
+# The password of the admin user. This variable should not be empty.
+
+nextcloud_users: []
+# The ansible users to create, other than the admin.
+# It is a list of hashes. Eg
+#
+# nextcloud_users:
+#   - name: alice
+#     pass: superstrongnot
+#     resetpassword: yes  # reset the passsword every time the playbook is run
+#     display_name: Alice B. Charlie
+#     settings:
+#       - firstrunwizard:
+#           show: 0
+#       - calendar:
+#           showWeekNr: 'yes'
+#     app_config:
+#       ...
+#
+# App and core configuration happens per user. To find out what config options
+# are available, either make the changes manually and then the oc_preferences
+# table in your nextcloud database or use the `occ config:list` command on your
+# server to get a listing of the current configuration options.
+# }}}
+# Apps {{{
 nextcloud_remove_unknown_apps: false
 # Setting to choose whether to remove or keep external apps which have not been
 # installed through this role, but manually or via the Nextcloud admin interface
@@ -132,25 +158,4 @@ nextcloud_config: {}
 #           | regex_replace('^/')
 #         }}
 # ```
-
-nextcloud_users: []
-# The ansible users to create, other than the admin.
-# It is a list of hashes. Eg
-#
-# nextcloud_users:
-#   - name: alice
-#     pass: superstrongnot
-#     resetpassword: yes  # reset the passsword every time the playbook is run
-#     display_name: Alice B. Charlie
-#     settings:
-#       - firstrunwizard:
-#           show: 0
-#       - calendar:
-#           showWeekNr: 'yes'
-#     app_config:
-#       ...
-#
-# App and core configuration happens per user. To find out what config options
-# are available, either make the changes manually and then the oc_preferences
-# table in your nextcloud database or use the `occ config:list` command on your
-# server to get a listing of the current configuration options.
+# }}}

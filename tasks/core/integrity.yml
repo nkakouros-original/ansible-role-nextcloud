@@ -3,7 +3,7 @@
 - name: Read extra files
   block:
     - name: Run integrity check for core
-      command: "./occ integrity:check-core --output=json"
+      command: "php occ integrity:check-core --output=json"
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       register: nextcloud_integrity_core
@@ -13,7 +13,7 @@
       changed_when: false
 
     - name: Run integrity check for apps
-      command: "./occ integrity:check-app {{ item }} --output=json"
+      command: "php occ integrity:check-app {{ item }} --output=json"
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       register: nextcloud_integrity_apps
@@ -35,7 +35,7 @@
         nextcloud_extra_files: >-
           [
             {%- for result in nextcloud_integrity_apps.results -%}
-              {%- set appname=(result.cmd[3]) -%}
+              {%- set appname=result.item -%}
               {%- set files=(result.stdout_lines[-1] | from_json) -%}
               {%- if files is mapping and 'EXTRA_FILE' in files -%}
                 "{{ []
@@ -70,7 +70,7 @@
         warn: false
 
     - name: Re-run integrity check for core to update integrity results
-      command: "./occ integrity:check-core --output=json"
+      command: "php occ integrity:check-core --output=json"
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       become: true
@@ -79,7 +79,7 @@
       changed_when: false
 
     - name: Re-run integrity check for apps to update integrity results
-      command: "./occ integrity:check-app {{ item }} --output=json"
+      command: "php occ integrity:check-app {{ item }} --output=json"
       args:
         chdir: "{{ nextcloud_installation_dir }}"
       loop: >-

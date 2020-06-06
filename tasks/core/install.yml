@@ -1,38 +1,28 @@
 ---
 
+# These tasks install Nextcloud if it is not installed on the system already.
+# They should run only once.
+
 - name: Install unzip
   package:
     name: unzip
     state: present
   when: download_file_type == '.zip'
 
-- name: Install imagemagick
+- name: Install dependencies
   package:
-    name: imagemagick
+    name: "{{ package }}"
+  loop: "{{ packages }}"
+  loop_control:
+    loop_var: package
+  vars:
+    packages:
+      - imagemagick
 
 - name: Check if nextcloud is already installed
   stat:
     path: "{{ nextcloud_installation_dir }}/updater/updater.phar"
   register: _result
-
-- name: Check if update is available
-  command: php updater/updater.phar
-  args:
-    chdir: "{{ nextcloud_installation_dir }}"
-  become: true
-  become_user: "{{ nextcloud_file_owner }}"
-  register: _result
-  changed_when: false
-  failed_when:
-    - _result is failed
-    # The updater will automatically try to install any updates if the shell is
-    # not interactive (as is the case with here). In that case, it means that
-    # Nextcloud has already been installed and an update was found. Assuming
-    # that Nextcloud was installed with this role, .htaccess will no be
-    # writtable. This will cause the updater to fail. But this is a failure we
-    # can expect.
-    - _result.stdout is not search('The following places can not be written to')
-  when: _result.stat.exists | bool
 
 - name: Download nextcloud
   unarchive:
@@ -42,11 +32,10 @@
     owner: "{{ nextcloud_file_owner }}"
     group: "{{ nextcloud_file_owner }}"
   register: _result
-  when: >-
-    _result is skipped
-    or _result.stdout is not search("No update available")
+  when: not _result.stat.exists
 
-- block:
+- name: Install nextcloud
+  block:
     # When extracting the downloaded nextcloud archive, the files are placed
     # under a nextcloud folder. Here, we rename this folder if the user has
     # specified a different folder.
@@ -69,7 +58,8 @@
 
     - name: Install nextcloud
       command: >-
-        php occ maintenance:install --no-interaction
+        php occ maintenance:install
+          --no-interaction
           --database "{{ nextcloud_database.backend }}"
           --database-name "{{ nextcloud_database.name }}"
           --database-user "{{ nextcloud_database.user }}"
@@ -85,53 +75,11 @@
         creates: "{{ nextcloud_installation_dir }}/config/config.php"
       become: true
       become_user: "{{ nextcloud_file_owner }}"
+      notify: nextcloud set file permissions
 
-    - name: Set file permissions on Nextcloud files
-      block:
-        - name: Find Nextcloud files
-          find:
-            path: "{{ nextcloud_installation_dir }}"
-            file_type: any
-          register: nextcloud_installation_files
-        - name: Set permissions on directories
-          file:
-            path: "{{ item.path }}"
-            owner: "{{ nextcloud_file_owner }}"
-            group: "{{ nextcloud_file_owner }}"
-            mode: 0o750
-            state: directory
-            recurse: true
-          loop: >-
-            {{
-              nextcloud_installation_files.files
-              | selectattr('isdir')
-              | list
-            }}
-        # For files, we are using `shell` as `file` with a loop would take ages
-        # to complete.
-        - name: Set ownership on files
-          command: >-
-            find "{{ nextcloud_installation_dir }}"
-              -type f
-              -exec chown {{
-                        nextcloud_file_owner }}:{{ nextcloud_file_owner }} {} \;
-              -exec chmod 0640 {} \;
-          changed_when: false
-        - name: Set permissions on installation directory
-          file:
-            path: "{{ nextcloud_installation_dir }}"
-            owner: root
-            group: "{{ nextcloud_file_owner }}"
-            mode: 0o750
-            state: directory
-        - name: Make occ executable
-          file:
-            path: "{{ nextcloud_installation_dir }}/occ"
-            mode: "u+x"
-        - name: Set permissions on htaccess file
-          file:
-            path: "{{ nextcloud_installation_dir }}/.htaccess"
-            owner: root
-            group: "{{ nextcloud_file_owner }}"
-            mode: 0o644
+    - name: Make occ executable
+      file:
+        path: "{{ nextcloud_installation_dir }}/occ"
+        mode: "u+x"
+
   when: _result is not skipped
